@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Orders</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        .order-list {
+            margin-top: 20px;
+        }
+        .order-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .order-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/member">Member</a></li>
+                <li><a href="/train">Trainer Management</a></li>
+                <li><a href="/classes">Classes</a></li>
+                <li><a href="/achievements">Achievements</a></li>
+                <li><a href="/prod">Product Management</a></li>
+                <li><a href="/order">Order</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/logout">Logout</a></li>
+           
+            </ul>
+        </nav>
+    </header>
+
+<body>
+    <div class="container">
+    <h1>All Orders</h1>
+        <div class="order-list" id="orderList"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            try {
+                // Fetch current user email
+                const emailResponse = await fetch('/api/users/current-user');
+                if (!emailResponse.ok) {
+                    throw new Error("Failed to fetch user email: " + emailResponse.status);
+                }
+                const email = await emailResponse.text(); // คาดหวัง string
+
+                if (!email) {
+                    alert('Please log in to view orders.');
+                    return;
+                }
+
+                // Fetch user roles to check if admin
+                const roleResponse = await fetch('/api/users/current-user');
+                if (!roleResponse.ok) {
+                    throw new Error("Failed to fetch user info: " + roleResponse.status);
+                }
+                const userData = await roleResponse.json();
+                const isAdmin = true;
+
+                if (isAdmin) {
+                    fetchAllOrders();
+                } else {
+                    fetchAllOrdersByUsername(email);
+                }
+            } catch (error) {
+                console.error("Error fetching user info:", error);
+                document.getElementById('orderList').innerHTML = '<p>Please log in to view orders.</p>';
+            }
+        });
+
+        function fetchAllOrdersByUsername(email) {
+            fetch(`/api/orders/user/${email}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok: " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(orders => {
+                    displayOrders(orders);
+                })
+                .catch(error => {
+                    console.error("There was a problem fetching user orders:", error);
+                    document.getElementById('orderList').innerHTML = '<p>Error loading orders. Please try again.</p>';
+                });
+        }
+
+        function fetchAllOrders() {
+            fetch(`/api/orders/all`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok: " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(orders => {
+                    displayOrders(orders);
+                })
+                .catch(error => {
+                    console.error("There was a problem fetching all orders:", error);
+                    document.getElementById('orderList').innerHTML = '<p>You do not have permission to view all orders.</p>';
+                });
+        }
+        
+        function formatDate(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date)) return "Invalid Date";
+                
+                const dateOptions = { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                };
+                
+                return date.toLocaleString('en-GB', dateOptions);
+            } catch (e) {
+                return "Invalid Date";
+            }
+        }
+
+        function displayOrders(orders) {
+            const orderList = document.getElementById("orderList");
+            orderList.innerHTML = "";
+
+            orders.forEach(order => {
+                const orderItem = document.createElement("div");
+                orderItem.className = "order-item";
+                orderItem.textContent = `Order ID: ${order.id}, Total Amount: ${order.totalAmount.toFixed(2)} ฿, Order Date & Time: ${formatDate(order.orderDate)}`;
+                
+                orderItem.addEventListener("click", function () {
+                    window.location.href = `/order-preview/${order.id}`;
+                });
+
+                orderList.appendChild(orderItem);
+            });
+        }
+    </script>
+</body>
+</html>

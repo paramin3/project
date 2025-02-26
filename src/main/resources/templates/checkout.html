@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .order-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .order-item img {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+        #total-price {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #checkout-form {
+            margin-top: 20px;
+        }
+        #checkout-form input, #checkout-form select {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+        }
+        #submit-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+        }
+        #submit-button:hover {
+            background-color: #45a049;
+        }
+        .shipping-info {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Checkout</h1>
+<div id="order-summary"></div>
+<h3 id="total-price">Total Price: 0.00 ฿</h3>
+
+<form id="checkout-form">
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="text" id="surname" placeholder="Surname" required>
+    <input type="tel" id="telephone" placeholder="Telephone Number" required>
+
+    <select id="delivery-type" required>
+        <option value="">Select Delivery Type</option>
+        <option value="pickup">Pickup</option>
+        <option value="shipping">Shipping</option>
+    </select>
+
+    <div id="shipping-fields" class="shipping-info">
+        <label for="saved-addresses">Select Saved Address:</label>
+        <select id="saved-addresses">
+            <option value="new">Enter New Address</option>
+        </select>
+
+        <div id="new-address-fields">
+            <input type="text" id="address" placeholder="Home Address">
+            <input type="text" id="postcode" placeholder="Postcode">
+            <input type="text" id="city" placeholder="City">
+            <input type="text" id="district" placeholder="District">
+            <input type="text" id="subDistrict" placeholder="Sub District">
+            <input type="text" id="road" placeholder="Road">
+            <input type="text" id="soi" placeholder="Soi">
+            <input type="text" id="moo" placeholder="Moo">
+        </div>
+    </div>
+
+    <input type="file" id="receipt" accept="image/*" required>
+    <button type="button" id="submit-button">Submit Order</button>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const orderSummary = document.getElementById('order-summary');
+    const totalPriceElement = document.getElementById('total-price');
+    const deliveryTypeSelect = document.getElementById('delivery-type');
+    const shippingFields = document.getElementById('shipping-fields');
+    const savedAddressesSelect = document.getElementById('saved-addresses');
+    const newAddressFields = document.getElementById('new-address-fields');
+    let totalAmount = 0;
+
+    async function loadOrderSummary() {
+        try {
+            const response = await axios.get('/api/cart/products');
+            totalAmount = 0;
+
+            if (Array.isArray(response.data) && response.data.length > 0) {
+                orderSummary.innerHTML = response.data.map(item => {
+                    if (!item.product) return '';
+
+                    const price = parseFloat(item.product.price) || 0;
+                    const quantity = parseInt(item.quantity) || 0;
+                    totalAmount += price * quantity;
+
+                    return `
+                        <div class="order-item">
+                            <img src="/uploads/images/products/${item.product.imagePaths?.[0] || ''}"
+                                 alt="${item.product.name || 'Product'}"
+                                 onerror="this.src='placeholder-image.jpg'">
+                            ${item.product.name} - ${price.toFixed(2)} ฿ x ${quantity}
+                        </div>
+                    `;
+                }).join('');
+                totalPriceElement.textContent = `Total Price: ${totalAmount.toFixed(2)} ฿`;
+            } else {
+                orderSummary.innerHTML = '<p>No items in the cart.</p>';
+                totalPriceElement.textContent = 'Total Price: 0.00 ฿';
+            }
+        } catch (error) {
+            console.error('Error loading order summary:', error);
+            orderSummary.innerHTML = '<p>Error loading cart items. Please try again later.</p>';
+        }
+    }
+
+    async function loadSavedAddresses() {
+        try {
+            const response = await axios.get('/api/addresses');
+            console.log('Response data:', response.data);
+            if (Array.isArray(response.data) && response.data.length > 0) {
+                savedAddressesSelect.innerHTML = '<option value="new">Enter New Address</option>';
+                response.data.forEach(address => {
+                    const option = document.createElement('option');
+                    option.value = address.id.toString();
+                    console.log('Address ID:', address.id);
+                    option.textContent = `${address.name} - ${address.homeAddress}, ${address.city}, ${address.district}, ${address.subDistrict}, ${address.road || ''}, ${address.soi || ''}, ${address.moo || ''}, ${address.postcode}`;
+                    option.dataset.address = JSON.stringify(address);
+                    savedAddressesSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading saved addresses:', error);
+            savedAddressesSelect.innerHTML = '<option value="new">Enter New Address</option>';
+        }
+    }
+
+    function handleDeliveryTypeChange() {
+        const isShipping = deliveryTypeSelect.value === 'shipping';
+        shippingFields.style.display = isShipping ? 'block' : 'none';
+
+        document.querySelectorAll('#new-address-fields input').forEach(input => {
+            input.required = isShipping && savedAddressesSelect.value === 'new';
+            if (!isShipping) input.value = '';
+        });
+    }
+
+    function handleSavedAddressChange() {
+        const isNewAddress = savedAddressesSelect.value === 'new';
+        newAddressFields.style.display = isNewAddress ? 'block' : 'none';
+
+        document.querySelectorAll('#new-address-fields input').forEach(input => {
+            input.required = isNewAddress && deliveryTypeSelect.value === 'shipping';
+            input.value = '';
+        });
+    }
+
+    async function submitOrder() {
+        const receiptFile = document.getElementById('receipt').files[0];
+        if (receiptFile) {
+            // Proceed with form data preparation and submission
+        } else {
+            alert('Please upload a valid receipt image.');
+            return;
+        }
+
+        try {
+            const emailResponse = await axios.get('/api/users/current-user');
+            let email = emailResponse.data;
+
+            if (typeof email === 'object' && email !== null) {
+                email = email.email || email.username;
+            }
+
+            if (!email || typeof email !== 'string') {
+                alert('Unable to retrieve valid email. Please log in again.');
+                return;
+            }
+
+            console.log('Email being sent:', email);
+
+            const cartResponse = await axios.get('/api/cart/products');
+            if (!Array.isArray(cartResponse.data) || cartResponse.data.length === 0) {
+                alert('Your cart is empty. Please add items to your cart before submitting an order.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('name', document.getElementById('name').value);
+            formData.append('surname', document.getElementById('surname').value);
+            formData.append('telephone', document.getElementById('telephone').value);
+            formData.append('deliveryType', deliveryTypeSelect.value);
+
+            if (deliveryTypeSelect.value === 'shipping') {
+                if (savedAddressesSelect.value === 'new') {
+                    const newAddress = {
+                        homeAddress: document.getElementById('address').value,
+                        postcode: document.getElementById('postcode').value,
+                        city: document.getElementById('city').value,
+                        district: document.getElementById('district').value,
+                        subDistrict: document.getElementById('subDistrict').value,
+                        road: document.getElementById('road').value || null,
+                        soi: document.getElementById('soi').value || null,
+                        moo: document.getElementById('moo').value || null,
+                        name: 'Checkout Address'
+                        // Removed isDefault field
+                    };
+                    formData.append('shippingAddress', JSON.stringify(newAddress));
+                } else {
+                    formData.append('addressId', savedAddressesSelect.value);
+                }
+            }
+
+            formData.append('receiptImage', receiptFile);
+
+            console.log('FormData being sent:', [...formData.entries()]);
+
+            const response = await axios.post('/api/orders', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            if (response.status === 201) {
+                alert('Order submitted successfully!');
+                orderSummary.innerHTML = '';
+                totalPriceElement.textContent = 'Total Price: 0.00 ฿';
+                document.getElementById('checkout-form').reset();
+                shippingFields.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error submitting order:', error);
+            alert('Failed to submit order: ' + (error.response?.data || error.message));
+        }
+    }
+
+
+    document.getElementById('submit-button').addEventListener('click', submitOrder);
+    deliveryTypeSelect.addEventListener('change', handleDeliveryTypeChange);
+    savedAddressesSelect.addEventListener('change', handleSavedAddressChange);
+
+    window.addEventListener('load', async () => {
+        try {
+            await Promise.all([loadOrderSummary(), loadSavedAddresses()]);
+            handleDeliveryTypeChange();
+        } catch (error) {
+            console.error('Error during page initialization:', error);
+        }
+    });
+</script>
+</body>
+</html>
