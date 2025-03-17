@@ -28,20 +28,71 @@ public class CartService {
     @Autowired
     private UserRepository userRepository;
 
-    // ดึงหรือสร้างตะกร้าสำหรับผู้ใช้ที่ล็อกอินหรือไม่ได้ล็อกอิน
     public Cart getOrCreateCart(String email, String sessionId) {
+        System.out.println("[CartService] getOrCreateCart called with email: " + email + ", sessionId: " + sessionId);
+        
         if (email != null) {
             User user = userRepository.findByEmail(email);
             if (user == null) {
-                return null; // User not found
+                System.out.println("[CartService] User not found: " + email);
+                return null;
             }
-            return cartRepository.findByUser(user)
-                    .orElseGet(() -> createCartForUser(user));
-        } else if (sessionId != null) {
-            return cartRepository.findBySessionId(sessionId)
-                    .orElseGet(() -> createCartForSession(sessionId));
+
+            Optional<Cart> userCartOpt = cartRepository.findByUser(user);
+            System.out.println("[CartService] User cart found: " + userCartOpt.isPresent());
+
+            if (sessionId != null) {
+                Optional<Cart> guestCartOpt = cartRepository.findBySessionId(sessionId);
+                System.out.println("[CartService] Guest cart found for sessionId: " + sessionId + ": " + guestCartOpt.isPresent());
+                
+                if (guestCartOpt.isPresent()) {
+                    Cart guestCart = guestCartOpt.get();
+                    Cart userCart = userCartOpt.orElseGet(() -> createCartForUser(user));
+                    
+                    System.out.println("[CartService] Before merge - Guest cart items: " + guestCart.getItems().size() + 
+                                       ", User cart items: " + userCart.getItems().size());
+                    
+                    mergeCarts(userCart, guestCart);
+                    cartRepository.delete(guestCart);
+                    
+                    System.out.println("[CartService] After merge - User cart items: " + userCart.getItems().size());
+                    return cartRepository.save(userCart);
+                }
+            }
+
+            return userCartOpt.orElseGet(() -> createCartForUser(user));
+        }  
+        else if (sessionId != null) {
+            Optional<Cart> guestCartOpt = cartRepository.findBySessionId(sessionId);
+            if (guestCartOpt.isPresent()) {
+                System.out.println("Guest cart retrieved for session ID: " + sessionId);
+                return guestCartOpt.get();
+            } else {
+                return createCartForSession(sessionId);
+            }
         }
+
+        System.out.println("Cart retrieval failed - Email: " + email + ", SessionId: " + sessionId);
         return null;
+    }
+
+
+    private void mergeCarts(Cart userCart, Cart guestCart) {
+        for (CartItem guestItem : guestCart.getItems()) {
+            Optional<CartItem> existingItemOpt = userCart.getItems().stream()
+                    .filter(item -> item.getProduct().getId().equals(guestItem.getProduct().getId()))
+                    .findFirst();
+
+            if (existingItemOpt.isPresent()) {
+                // If product already exists in user cart, update quantity
+                CartItem existingItem = existingItemOpt.get();
+                existingItem.setQuantity(existingItem.getQuantity() + guestItem.getQuantity());
+            } else {
+                // If not, move item to user cart
+                guestItem.setCart(userCart);
+                userCart.getItems().add(guestItem);
+            }
+        }
     }
 
     private Cart createCartForUser(User user) {
@@ -53,7 +104,10 @@ public class CartService {
     private Cart createCartForSession(String sessionId) {
         Cart cart = new Cart();
         cart.setSessionId(sessionId);
-        return cartRepository.save(cart);
+        Cart savedCart = cartRepository.save(cart);
+        
+        System.out.println("Guest cart created with Session ID: " + sessionId);
+        return savedCart;
     }
 
     // เพิ่มสินค้าไปยังตะกร้า

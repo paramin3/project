@@ -58,6 +58,14 @@ input, textarea, select {
     border-radius: 3px;
     width: 100%;
 }
+.achievement-card img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px auto;
+    border-radius: 5px;
+}
+
 
 button {
     padding: 0.5rem;
