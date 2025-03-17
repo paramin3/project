@@ -1,9 +1,12 @@
-HELP.md
+# Ignore build directories
 target/
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
+# Allow the Maven wrapper (mvnw and mvnw.cmd)
+!mvnw
+!mvnw.cmd
+
+# Ignore the local development environments' files
 ### STS ###
 .apt_generated
 .classpath
@@ -31,3 +34,4 @@ build/
 
 ### VS Code ###
 .vscode/
+
