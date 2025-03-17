@@ -2,6 +2,7 @@ package com.taekwondogym.backend.controller;
 
 import com.taekwondogym.backend.dto.LoginRequest;
 import com.taekwondogym.backend.model.User;
+import com.taekwondogym.backend.service.CartService;
 import com.taekwondogym.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.Principal;
 import java.util.Map;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -27,6 +31,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private CartService cartService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -46,22 +53,50 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Validated @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         try {
+            // Extract sessionId from cookie before authentication
+            String guestSessionId = null;
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("sessionId".equals(cookie.getName())) {
+                        guestSessionId = cookie.getValue();
+                        System.out.println("[UserController] Found sessionId in cookie: " + guestSessionId);
+                        break;
+                    }
+                }
+            }
+            
+            // Standard authentication
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getEmail(), // Changed from username to email
+                            loginRequest.getEmail(),
                             loginRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
-            HttpSession session = request.getSession(true);
-            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, 
+            HttpSession newSession = request.getSession(true);
+            newSession.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, 
                                  SecurityContextHolder.getContext());
+            
+            // Merge carts immediately after successful authentication
+            if (guestSessionId != null) {
+                System.out.println("[UserController] Merging cart with sessionId: " + guestSessionId);
+                cartService.getOrCreateCart(loginRequest.getEmail(), guestSessionId);
+                
+                // Clear sessionId cookie after merging
+                Cookie cookie = new Cookie("sessionId", "");
+                cookie.setPath("/");
+                cookie.setMaxAge(0);
+                ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                        .getResponse().addCookie(cookie);
+            }
 
-            return ResponseEntity.ok(new LoginResponse("Login successful", loginRequest.getEmail())); // Changed to email
+            return ResponseEntity.ok(new LoginResponse("Login successful", loginRequest.getEmail()));
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                 .body(new LoginResponse("Invalid email or password", null)); // Changed from username to email
+                                 .body(new LoginResponse("Invalid email or password", null));
         } catch (Exception ex) {
+            System.out.println("[UserController] Login exception: " + ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body(new LoginResponse("An error occurred during login", null));
         }

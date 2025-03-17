@@ -41,57 +41,73 @@ public class CartController {
 
     // Retrieve or generate session ID for guests
     private String getSessionId() {
-        // Try to retrieve sessionId from session
         String sessionId = (String) session.getAttribute("sessionId");
+        System.out.println("[CartController] Retrieved Session ID from session: " + sessionId);
 
         if (sessionId == null) {
-            // Try to retrieve sessionId from cookies
+            System.out.println("[CartController] Session ID is null, checking cookies...");
             Cookie[] cookies = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                     .getRequest().getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if ("sessionId".equals(cookie.getName())) {
                         sessionId = cookie.getValue();
+                        System.out.println("[CartController] Retrieved Session ID from cookie: " + sessionId);
                         break;
                     }
                 }
             }
 
-            // If sessionId is still null, generate a new one
             if (sessionId == null) {
                 sessionId = UUID.randomUUID().toString();
                 session.setAttribute("sessionId", sessionId);
+                System.out.println("[CartController] New Session ID generated: " + sessionId);
 
-                // Store sessionId in a cookie
+                // Store in cookie
                 Cookie cookie = new Cookie("sessionId", sessionId);
                 cookie.setHttpOnly(true);
                 cookie.setPath("/");
-                cookie.setMaxAge(60 * 60 * 24); // 1-day expiry
+                cookie.setMaxAge(60 * 60 * 24); // 1 day
                 ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                         .getResponse().addCookie(cookie);
+                System.out.println("[CartController] Stored new Session ID in cookie: " + sessionId);
             }
         }
 
         return sessionId;
     }
 
-
-
-    // Retrieve cart
     @GetMapping
     public ResponseEntity<Cart> getCart() {
         String email = getCurrentUserEmail();
         Cart cart;
-
+        
+        // Get sessionId from both session and cookie
+        String sessionId = getSessionId();
+        System.out.println("[CartController] Working with sessionId: " + sessionId);
+        
         if (email != null) {
-            String sessionId = getSessionId();  // Keep the session ID for merging
+            // For logged-in users, pass the sessionId to allow merging
             cart = cartService.getOrCreateCart(email, sessionId);
-            session.removeAttribute("sessionId"); // Remove session ID after merging
+            
+            // Only after successful merging, remove the sessionId from both session and cookie
+            if (sessionId != null) {
+                session.removeAttribute("sessionId");
+                
+                // Add a new cookie with max-age=0 to remove it
+                Cookie cookie = new Cookie("sessionId", "");
+                cookie.setPath("/");
+                cookie.setMaxAge(0);
+                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                        .getResponse().addCookie(cookie);
+                
+                System.out.println("[CartController] Removed sessionId after cart merge");
+            }
         } else {
-            String sessionId = getSessionId();
+            // For guests, use the sessionId
             cart = cartService.getOrCreateCart(null, sessionId);
         }
-
+        
         return ResponseEntity.ok(cart);
     }
 
