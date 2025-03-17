@@ -4,6 +4,8 @@ import com.taekwondogym.backend.dto.CartItemDTO;
 import com.taekwondogym.backend.model.Cart;
 import com.taekwondogym.backend.model.CartItem;
 import com.taekwondogym.backend.service.CartService;
+
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,13 +41,41 @@ public class CartController {
 
     // Retrieve or generate session ID for guests
     private String getSessionId() {
+        // Try to retrieve sessionId from session
         String sessionId = (String) session.getAttribute("sessionId");
+
         if (sessionId == null) {
-            sessionId = UUID.randomUUID().toString(); // Generate a new session ID
-            session.setAttribute("sessionId", sessionId);
+            // Try to retrieve sessionId from cookies
+            Cookie[] cookies = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                    .getRequest().getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("sessionId".equals(cookie.getName())) {
+                        sessionId = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+
+            // If sessionId is still null, generate a new one
+            if (sessionId == null) {
+                sessionId = UUID.randomUUID().toString();
+                session.setAttribute("sessionId", sessionId);
+
+                // Store sessionId in a cookie
+                Cookie cookie = new Cookie("sessionId", sessionId);
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                cookie.setMaxAge(60 * 60 * 24); // 1-day expiry
+                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                        .getResponse().addCookie(cookie);
+            }
         }
+
         return sessionId;
     }
+
+
 
     // Retrieve cart
     @GetMapping
@@ -52,8 +84,9 @@ public class CartController {
         Cart cart;
 
         if (email != null) {
-            cart = cartService.getOrCreateCart(email, null);
-            session.removeAttribute("sessionId"); // Remove session ID when user logs in
+            String sessionId = getSessionId();  // Keep the session ID for merging
+            cart = cartService.getOrCreateCart(email, sessionId);
+            session.removeAttribute("sessionId"); // Remove session ID after merging
         } else {
             String sessionId = getSessionId();
             cart = cartService.getOrCreateCart(null, sessionId);
