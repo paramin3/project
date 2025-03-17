@@ -29,32 +29,39 @@ public class CartService {
     private UserRepository userRepository;
 
     public Cart getOrCreateCart(String email, String sessionId) {
+        System.out.println("[CartService] getOrCreateCart called with email: " + email + ", sessionId: " + sessionId);
+        
         if (email != null) {
             User user = userRepository.findByEmail(email);
             if (user == null) {
-                System.out.println("User not found: " + email);
+                System.out.println("[CartService] User not found: " + email);
                 return null;
             }
 
             Optional<Cart> userCartOpt = cartRepository.findByUser(user);
+            System.out.println("[CartService] User cart found: " + userCartOpt.isPresent());
 
             if (sessionId != null) {
                 Optional<Cart> guestCartOpt = cartRepository.findBySessionId(sessionId);
+                System.out.println("[CartService] Guest cart found for sessionId: " + sessionId + ": " + guestCartOpt.isPresent());
+                
                 if (guestCartOpt.isPresent()) {
-                    System.out.println("Guest cart found for session ID: " + sessionId);
                     Cart guestCart = guestCartOpt.get();
                     Cart userCart = userCartOpt.orElseGet(() -> createCartForUser(user));
-
+                    
+                    System.out.println("[CartService] Before merge - Guest cart items: " + guestCart.getItems().size() + 
+                                       ", User cart items: " + userCart.getItems().size());
+                    
                     mergeCarts(userCart, guestCart);
                     cartRepository.delete(guestCart);
-                    System.out.println("Merged guest cart into user cart: " + email);
+                    
+                    System.out.println("[CartService] After merge - User cart items: " + userCart.getItems().size());
                     return cartRepository.save(userCart);
                 }
             }
 
-            System.out.println("User cart retrieved for: " + email);
             return userCartOpt.orElseGet(() -> createCartForUser(user));
-        } 
+        }  
         else if (sessionId != null) {
             Optional<Cart> guestCartOpt = cartRepository.findBySessionId(sessionId);
             if (guestCartOpt.isPresent()) {
