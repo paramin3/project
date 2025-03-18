@@ -25,7 +25,7 @@ public class SecurityConfig {
         http
         .cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of("project-production-1cc9.up.railway.app")); // Frontend origin
+            config.setAllowedOrigins(List.of("https://project-production-1cc9.up.railway.app")); // Frontend origin
             config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
             config.setAllowedHeaders(List.of("*"));
             config.setAllowCredentials(true);
