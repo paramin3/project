@@ -13,6 +13,18 @@ public class TrainerImageStore {
 
     private static final String IMAGE_DIRECTORY = "src/main/resources/uploads/images/trainers/";
 
+    public TrainerImageStore() {
+        // Ensure the directory exists
+        Path path = Paths.get(IMAGE_DIRECTORY);
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectories(path);
+            } catch (IOException e) {
+                e.printStackTrace();  // Handle exception or log error properly
+            }
+        }
+    }
+    
     public void setContent(String filename, InputStream inputStream) throws IOException {
         Path path = Paths.get(IMAGE_DIRECTORY + filename);
         Files.copy(inputStream, path);
