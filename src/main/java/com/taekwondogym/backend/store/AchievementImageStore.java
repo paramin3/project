@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 @Component
 public class AchievementImageStore {
 
-    private static final String IMAGE_DIRECTORY = "/opt/app/uploads/images/achievements/";
+    private static final String IMAGE_DIRECTORY = "src/main/resources/uploads/images/achievements/";
 
     public AchievementImageStore() {
         // Ensure the directory exists

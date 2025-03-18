@@ -22,7 +22,7 @@ public class ImageController {
 
     @GetMapping("/uploads/images/achievements/{filename:.+}")
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-        File file = new File("/opt/app/uploads/images/achievements/" + filename);
+        File file = new File("src/main/resources/uploads/images/achievements/" + filename);
         Resource resource = resourceLoader.getResource("file:" + file.getAbsolutePath());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
