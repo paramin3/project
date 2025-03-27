@@ -1,7 +1,11 @@
 package com.taekwondogym.backend.controller;
 
 import com.taekwondogym.backend.dto.LoginRequest;
+import com.taekwondogym.backend.model.Role;
+import com.taekwondogym.backend.model.RoleName;
 import com.taekwondogym.backend.model.User;
+import com.taekwondogym.backend.repository.RoleRepository;
+import com.taekwondogym.backend.repository.UserRepository;
 import com.taekwondogym.backend.service.CartService;
 import com.taekwondogym.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +24,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.Cookie;
@@ -29,12 +35,18 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/api/users")
 public class UserController {
 
+	@Autowired
+    private UserRepository userRepository;
+	
     @Autowired
     private UserService userService;
     
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private RoleRepository roleRepository;
+    
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -119,6 +131,52 @@ public class UserController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
     }
+    
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userRepository.findAll(); // Get all users
+        return ResponseEntity.ok(users);
+    }
+
+    
+    @PutMapping("/change-role/{email}")
+    public ResponseEntity<?> changeRole(@PathVariable String email, @RequestBody Map<String, String> payload) {
+        // Fetch user by email
+        User user = userRepository.findByEmail(email);
+
+        // Check if the user exists, throw exception if not
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body(Map.of("error", "User not found"));
+        }
+
+        // Get the role name from the payload
+        String roleName = payload.get("newRole");
+        
+        // Ensure the role name starts with "ROLE_"
+        if (!roleName.startsWith("ROLE_")) {
+            roleName = "ROLE_" + roleName.toUpperCase();
+        }
+
+        // Find the role
+        Role role = roleRepository.findByName(roleName);
+
+        // Check if the role exists
+        if (role == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(Map.of("error", "Role not found: " + roleName));
+        }
+
+        // Set the new role for the user
+        user.setRole(role);
+
+        // Save the user with the updated role
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "Role updated successfully"));
+    }
+
+
 }
 
 class LoginResponse {

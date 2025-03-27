@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change User Role</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin: 1rem 0;
+            color: #007bff;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 1rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 1rem;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 0.7rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Smaller Buttons for Load Actions */
+        #loadMemberButton, #loadAllMembersButton {
+            width: auto;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin: 1rem 5px;
+            background-color: #007bff;
+            color: white;
+        }
+
+        #loadMemberButton:hover, #loadAllMembersButton:hover {
+            background-color: #0056b3;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            margin-top: 1rem;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            form {
+                padding: 1rem;
+            }
+
+            input {
+                font-size: 0.9rem;
+            }
+
+            button {
+                font-size: 0.9rem;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/role">Role Management</a></li>
+            <li><a href="/member">Member</a></li>
+            <li><a href="/train">Trainer Management</a></li>
+            <li><a href="/classes">Classes</a></li>
+            <li><a href="/achievements">Achievements</a></li>
+            <li><a href="/prod">Product Management</a></li>
+            <li><a href="/order">Order</a></li>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+    <h2>Change User Role</h2>
+    <form onsubmit="event.preventDefault(); changeUserRole();">
+        <div>
+            <label for="userSelect">Select User (Email):</label>
+            <select id="userSelect" required>
+                <!-- Users will be populated here -->
+            </select>
+        </div>
+
+        <div>
+            <label for="roleSelect">Select Role:</label>
+            <select id="roleSelect" required>
+                <option value="USER">User</option>
+                <option value="STAFF">Staff</option>
+                <option value="ADMIN">Admin</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit">Change Role</button>
+        </div>
+    </form>
+    <script>
+        function loadUsers() {
+            fetch('/api/users/all')
+                .then(response => response.json())
+                .then(users => {
+                    const userSelect = document.getElementById('userSelect');
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.email;
+                        option.textContent = user.email;
+                        userSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching users:', error));
+        }
+
+        function changeUserRole() {
+            const email = document.getElementById('userSelect').value;
+            const role = document.getElementById('roleSelect').value;
+
+            const data = {
+                newRole: role
+            };
+
+            fetch(`/api/users/change-role/${email}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error updating the user role.');
+            });
+        }
+
+        window.onload = loadUsers;
+    </script>
+</body>
+</html>

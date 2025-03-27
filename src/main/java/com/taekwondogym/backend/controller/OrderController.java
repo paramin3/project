@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -180,5 +181,18 @@ public class OrderController {
     public ResponseEntity<List<Order>> getOrdersByUser(@PathVariable String email) {
         List<Order> orders = orderService.findAllByEmail(email);
         return ResponseEntity.ok(orders);
+    }
+    
+    @GetMapping("/sales-summary")
+    public ResponseEntity<List<Map<String, Object>>> getSalesSummary(
+            @RequestParam(required = false) Long productId) {
+        List<Map<String, Object>> salesSummary = orderService.getMonthlySalesSummary(productId);
+        return ResponseEntity.ok(salesSummary);
+    }
+    
+    @GetMapping("/sales/{productId}")
+    public ResponseEntity<Double> getTotalSalesByProduct(@PathVariable Long productId) {
+        double totalSales = orderService.calculateTotalSalesByProduct(productId);
+        return ResponseEntity.ok(totalSales);
     }
 }

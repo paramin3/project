@@ -22,7 +22,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -109,4 +111,27 @@ public class OrderService {
         }
         return orderRepository.findByUser(user); // Fetch orders by user entity
     }
+    
+    public List<Map<String, Object>> getMonthlySalesSummary(Long productId) {
+        List<Object[]> results = orderRepository.getMonthlySalesSummary(productId);
+        List<Map<String, Object>> summaryList = new ArrayList<>();
+
+        for (Object[] result : results) {
+            Map<String, Object> summary = new HashMap<>();
+            summary.put("month", result[0]);
+            summary.put("totalSales", result[1]);
+            summaryList.add(summary);
+        }
+        return summaryList;
+    }
+    
+    public double calculateTotalSalesByProduct(Long productId) {
+        List<Order> orders = orderRepository.findByOrderItemsProductId(productId);
+        return orders.stream()
+                .flatMap(order -> order.getOrderItems().stream())
+                .filter(orderItem -> orderItem.getProduct().getId().equals(productId))
+                .mapToDouble(orderItem -> orderItem.getPrice() * orderItem.getQuantity())
+                .sum();
+    }
+
 }

@@ -78,4 +78,8 @@ public class MainController {
     public String showAdress() {
         return "address"; 
     }
+    @GetMapping("/role")
+    public String showRole() {
+        return "role"; 
+    }
 }
