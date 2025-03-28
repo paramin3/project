@@ -32,11 +32,13 @@ public class SecurityConfig {
             config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
             config.setAllowedHeaders(List.of("*"));
             config.setAllowCredentials(true);
+            config.setMaxAge(3600L);
             return config;
         }))
         .csrf(csrf -> csrf
                 .disable())
             .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             		.requestMatchers("/", "/api/users/register", "/api/users/login").permitAll()
                     .requestMatchers("/css/**", "/js/**").permitAll()
                     .requestMatchers("/login", "/register","/shop").permitAll()
@@ -97,12 +99,14 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .permitAll()
             )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-            );
+   .logout(logout -> logout
+    .logoutUrl("/logout")
+    .logoutSuccessHandler((request, response, authentication) -> {
+        response.setStatus(HttpServletResponse.SC_OK);
+    })
+    .invalidateHttpSession(true)
+    .deleteCookies("JSESSIONID")
+);
 
         return http.build();
     }
