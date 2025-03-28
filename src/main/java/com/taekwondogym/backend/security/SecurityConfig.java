@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -98,14 +97,12 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .permitAll()
             )
-.logout(logout -> logout
-    .logoutUrl("/api/users/logout")
-    .logoutSuccessHandler((request, response, authentication) -> {
-        response.setStatus(HttpServletResponse.SC_OK);
-    })
-    .invalidateHttpSession(true)
-    .deleteCookies("JSESSIONID")
-);
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout=true")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+            );
 
         return http.build();
     }
