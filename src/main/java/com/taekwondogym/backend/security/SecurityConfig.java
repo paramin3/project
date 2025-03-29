@@ -73,7 +73,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.DELETE, "/api/cart/products/**").permitAll() // Allow users to remove products
 
                     // Achievement-related permissions
-                    .requestMatchers(HttpMethod.GET, "/api/achievements/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/achievements", "/api/achievements/", "/api/achievements/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/achievements/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/api/achievements/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/achievements/**").hasRole("ADMIN")
