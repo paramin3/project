@@ -148,52 +148,42 @@ public class OrderController {
 
             // Save order
 try {
-    Order savedOrder = orderService.saveOrder(order, email);
-    cartService.clearCart(email, null);
-
-    // 🆕 แปลง Order → OrderItemDTO
-    List<OrderItemDTO> itemDTOs = savedOrder.getOrderItems().stream()
-        .map(item -> new OrderItemDTO(
-            item.getProduct().getName(),
-            item.getPrice(),
-            item.getQuantity()
-        ))
-        .toList();
-
-    // 🆕 สร้าง OrderResponseDTO
-    OrderResponseDTO responseDTO = new OrderResponseDTO(
-        savedOrder.getName(),
-        savedOrder.getSurname(),
-        savedOrder.getTelephone(),
-        savedOrder.getDeliveryType(),
-        savedOrder.getTotalAmount(),
-        savedOrder.getOrderDate(),
-        itemDTOs
-    );
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
-
-}catch (RuntimeException e) {
-    System.err.println("Error saving order: " + e.getMessage());
-    e.printStackTrace();
-
-    Map<String, Object> errorResponse = Map.of(
-        "message", e.getMessage(),
-        "type", e.getClass().getSimpleName()
-    );
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-}
+     Order savedOrder = orderService.saveOrder(order, email);
+     cartService.clearCart(email, null);
+ 
+     // 🆕 แปลง Order → OrderItemDTO
+     List<OrderItemDTO> itemDTOs = savedOrder.getOrderItems().stream()
+         .map(item -> new OrderItemDTO(
+             item.getProduct().getName(),
+             item.getPrice(),
+             item.getQuantity()
+         ))
+         .toList();
+ 
+     // 🆕 สร้าง OrderResponseDTO
+     OrderResponseDTO responseDTO = new OrderResponseDTO(
+         savedOrder.getName(),
+         savedOrder.getSurname(),
+         savedOrder.getTelephone(),
+         savedOrder.getDeliveryType(),
+         savedOrder.getTotalAmount(),
+         savedOrder.getOrderDate(),
+         itemDTOs
+     );
+ 
+     return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+ 
+ }  catch (Exception e) {
+     System.err.println("Unexpected error creating order: " + e.getMessage());
+     e.printStackTrace();
+ 
+     Map<String, Object> errorResponse = Map.of(
+         "message", e.getMessage(),
+         "type", e.getClass().getSimpleName()
+     );
+     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+ }
             
- } catch (Exception e) {
-    System.err.println("Unexpected error creating order: " + e.getMessage());
-    e.printStackTrace();
-
-    Map<String, Object> errorResponse = Map.of(
-        "message", e.getMessage(),
-        "type", e.getClass().getSimpleName()
-    );
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-}
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderDetails(@PathVariable Long orderId) {
         Optional<Order> order = orderService.findById(orderId);
