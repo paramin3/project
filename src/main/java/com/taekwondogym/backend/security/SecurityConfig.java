@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
@@ -33,57 +34,70 @@ public class SecurityConfig {
         }))
         .csrf(csrf -> csrf
                 .disable())
-            .authorizeHttpRequests(auth -> auth
-            		.requestMatchers("/", "/api/users/register", "/api/users/login").permitAll()
-                    .requestMatchers("/css/**", "/js/**").permitAll()
-                    .requestMatchers("/login", "/register","/shop").permitAll()
-                    .requestMatchers("/prod").hasRole("ADMIN")
-                    .requestMatchers("/uploads/images/**","/uploads/**").permitAll()
-                    // Protect the trainer related pages and allow only authorized users
-                    .requestMatchers(HttpMethod.GET, "/api/trainers/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/trainers/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/api/trainers/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/api/trainers/**").hasRole("ADMIN")
+        .authorizeHttpRequests(auth -> auth
+        	    // Public endpoints
+        	    .requestMatchers("/", "/api/users/register", "/api/users/login").permitAll()
+        	    .requestMatchers("/css/**", "/js/**").permitAll()
+        	    .requestMatchers("/login", "/register", "/shop").permitAll()
+        	    .requestMatchers("/uploads/images/**", "/uploads/**").permitAll()
+        	    
+        	    // Admin-only endpoints
+        	    .requestMatchers("/prod").hasAnyRole("ADMIN", "STAFF")
+        	    
+        	    // Trainer endpoints
+        	    .requestMatchers(HttpMethod.GET, "/api/trainers/**").permitAll()
+        	    .requestMatchers(HttpMethod.POST, "/api/trainers/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.PUT, "/api/trainers/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.DELETE, "/api/trainers/**").hasRole("ADMIN")
 
-                    // Allow unauthenticated access to TrainingClass GET methods (for viewing)
-                    .requestMatchers(HttpMethod.GET, "/api/classes/**").permitAll()
+        	    // TrainingClass endpoints
+        	    .requestMatchers(HttpMethod.GET, "/api/classes/**").permitAll()
+        	    .requestMatchers(HttpMethod.POST, "/api/classes/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.PUT, "/api/classes/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.DELETE, "/api/classes/**").hasRole("ADMIN")
 
-                    // Allow only admins to create, update, or delete TrainingClass
-                    .requestMatchers(HttpMethod.POST, "/api/classes/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/api/classes/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/api/classes/**").hasRole("ADMIN")
+        	    // Product endpoints
+        	    .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+        	    .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
 
-                    // Product-related permissions
-                    .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+        	    // Cart endpoints (unchanged)
+        	    .requestMatchers("/cart", "/api/cart/**").permitAll()
+        	    .requestMatchers(HttpMethod.GET, "/api/products/{id}/check-stock").permitAll()
+        	    .requestMatchers(HttpMethod.POST, "/api/cart/products/**").permitAll()
+        	    .requestMatchers(HttpMethod.PUT, "/api/cart/products/**").permitAll()
+        	    .requestMatchers(HttpMethod.DELETE, "/api/cart/products/**").permitAll()
 
-                    // Cart-related permissions
-                    .requestMatchers("/cart", "/api/cart/**").permitAll() // Allow unauthenticated access to cart endpoints
-                    .requestMatchers(HttpMethod.GET, "/api/products/{id}/check-stock").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/cart/products/**").permitAll() // Allow users to add products
-                    .requestMatchers(HttpMethod.PUT, "/api/cart/products/**").permitAll() // Allow users to update quantities
-                    .requestMatchers(HttpMethod.DELETE, "/api/cart/products/**").permitAll() // Allow users to remove products
+        	    // Achievement endpoints
+        	    .requestMatchers(HttpMethod.GET, "/api/achievements", "/api/achievements/", "/api/achievements/{id}").permitAll()
+        	    .requestMatchers(HttpMethod.POST, "/api/achievements/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.PUT, "/api/achievements/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.DELETE, "/api/achievements/**").hasRole("ADMIN")
 
-                    // Achievement-related permissions
-                    .requestMatchers(HttpMethod.GET,"/api/achievements","/api/achievements/","/api/achievements/{id}").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/achievements/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/api/achievements/**").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/api/achievements/**").hasRole("ADMIN")
+        	    // Member endpoints
+        	    .requestMatchers("/api/members/current").authenticated()
+        	    .requestMatchers("/api/members/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.GET, "/api/members/{id}").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.PUT, "/api/members/{id}").hasAnyRole("ADMIN", "STAFF")
 
-                    // Member-related permissions
-                    .requestMatchers("/api/members/current").authenticated()  // Users can access and submit their own forms
-                    .requestMatchers("/api/members/**").hasRole("ADMIN")      // Admin can access any member form
-                    .requestMatchers(HttpMethod.GET, "/api/members/{id}").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/api/members/{id}").hasRole("ADMIN")
+        	    // Order endpoints
+        	    .requestMatchers(HttpMethod.GET, "/api/orders/user/{email}/**").authenticated()
+        	    .requestMatchers(HttpMethod.POST, "/api/orders/**").authenticated()
+        	    .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyRole("ADMIN", "STAFF")
+        	    .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasRole("ADMIN")
 
-                    .requestMatchers(HttpMethod.GET, "/api/orders/user/{email}/**").authenticated()
-                    .requestMatchers(HttpMethod.POST, "/api/orders/**").authenticated()  // Allow authenticated users to place orders
-                    .requestMatchers(HttpMethod.GET, "/api/orders/**").hasRole("ADMIN")  // Admins can view orders
-                    .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasRole("ADMIN")
-                    .anyRequest().authenticated()
-            )
+        	    // Role endpoints
+        	    .requestMatchers("/role").hasRole("ADMIN")
+        	    .requestMatchers(HttpMethod.PUT, "/api/users/change-role/{email}").hasRole("ADMIN")
+        	    
+        	    // Activity logs (add this if missing)
+        	    .requestMatchers("/activity-logs").hasRole("ADMIN")
+        	    .requestMatchers("/api/activity-logs/**").hasRole("ADMIN")
+
+        	    // All other requests require authentication
+        	    .anyRequest().authenticated()
+        	)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .sessionFixation().migrateSession()

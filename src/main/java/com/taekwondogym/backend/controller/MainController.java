@@ -82,4 +82,9 @@ public class MainController {
     public String showRole() {
         return "role"; 
     }
+    @GetMapping("/activity-logs")
+    public String activityLogsPage() {
+        // This will serve the activity logs page from your templates
+        return "activity-logs";
+    }
 }

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Activity Logs</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .filter-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.secondary {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        button.secondary:hover {
+            background-color: #e9ecef;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            align-items: center;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .details-cell {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .details-cell:hover {
+            overflow: visible;
+            white-space: normal;
+            background-color: #f8f9fa;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<header>
+    <nav>
+        <ul>
+            <li><a href="/">หน้าหลัก</a></li>
+            <li><a href="/role">การจัดการผู้ดูแล</a></li>
+            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/train">การจัดการผู้สอน</a></li>
+            <li><a href="/classes">ตารางเรียน</a></li>
+            <li><a href="/achievements">ข่าวสาร</a></li>
+            <li><a href="/prod">การจัดการสินค้า</a></li>
+            <li><a href="/order">คำสั่งซื้อ</a></li>
+            <li><a href="/activity-logs">ประวัติ</a>
+            <li><a href="/login">เข้าสู่ระบบ</a></li>
+            <li><a href="/logout">ออกจากระบบ</a></li>
+        </ul>
+    </nav>
+</header>
+<body>
+    <h1>User Activity Logs</h1>
+    
+    <div class="filter-container">
+        <h2>Filters</h2>
+        <div class="filter-section">
+            <div class="filter-group">
+			    <label for="email">Email:</label>
+			    <input type="text" id="email" placeholder="Filter by email">
+			</div>
+            <div class="filter-group">
+                <label for="action">Action:</label>
+                <input type="text" id="action" placeholder="e.g. POST, PUT, DELETE">
+            </div>
+            <div class="filter-group">
+                <label for="startDate">Start Date:</label>
+                <input type="datetime-local" id="startDate">
+            </div>
+            <div class="filter-group">
+                <label for="endDate">End Date:</label>
+                <input type="datetime-local" id="endDate">
+            </div>
+        </div>
+        <div>
+            <button id="applyFilters">Apply Filters</button>
+            <button id="clearFilters" class="secondary">Clear Filters</button>
+        </div>
+    </div>
+    
+    <div id="logsContainer">
+        <div id="loading" class="loading">Loading logs...</div>
+        <table id="logsTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                    <th>IP Address</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody id="logsTableBody">
+                <!-- Logs will be inserted here -->
+            </tbody>
+        </table>
+        <div id="noLogs" style="display: none; text-align: center; padding: 20px;">
+            No logs found matching your criteria.
+        </div>
+        
+        <div class="pagination">
+            <span id="pageInfo">Showing page 1 of 1</span>
+            <div>
+                <button id="prevPage" disabled>Previous</button>
+                <button id="nextPage" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const logsTable = document.getElementById('logsTable');
+            const logsTableBody = document.getElementById('logsTableBody');
+            const loading = document.getElementById('loading');
+            const noLogs = document.getElementById('noLogs');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevPageBtn = document.getElementById('prevPage');
+            const nextPageBtn = document.getElementById('nextPage');
+            const applyFiltersBtn = document.getElementById('applyFilters');
+            const clearFiltersBtn = document.getElementById('clearFilters');
+            
+            let currentPage = 0;
+            let totalPages = 0;
+            
+            // Initial load
+            fetchLogs();
+            
+            // Event listeners
+            applyFiltersBtn.addEventListener('click', function() {
+                currentPage = 0;
+                fetchLogs();
+            });
+            
+            clearFiltersBtn.addEventListener('click', function() {
+                document.getElementById('email').value = '';
+                document.getElementById('action').value = '';
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
+                currentPage = 0;
+                fetchLogs();
+            });
+            
+            prevPageBtn.addEventListener('click', function() {
+                if (currentPage > 0) {
+                    currentPage--;
+                    fetchLogs();
+                }
+            });
+            
+            nextPageBtn.addEventListener('click', function() {
+                if (currentPage < totalPages - 1) {
+                    currentPage++;
+                    fetchLogs();
+                }
+            });
+            
+            // Fetch logs function
+            function fetchLogs() {
+                // Show loading indicator
+                loading.style.display = 'block';
+                logsTable.style.display = 'none';
+                noLogs.style.display = 'none';
+                
+                // Get filter values
+                const email = document.getElementById('email').value;
+                const action = document.getElementById('action').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                // Build URL based on filters
+                let url = `/api/activity-logs?page=${currentPage}&size=10&sort=timestamp,desc`;
+                
+                if (email) {
+                    url = `/api/activity-logs/user/${email}?page=${currentPage}&size=10&sort=timestamp,desc`;
+                } else if (action) {
+                    url = `/api/activity-logs/action/${action}?page=${currentPage}&size=10&sort=timestamp,desc`;
+                } else if (startDate && endDate) {
+                    // Format date for API
+                    const formattedStartDate = new Date(startDate).toISOString();
+                    const formattedEndDate = new Date(endDate).toISOString();
+                    url = `/api/activity-logs/date-range?start=${formattedStartDate}&end=${formattedEndDate}&page=${currentPage}&size=10&sort=timestamp,desc`;
+                }
+                
+                // Fetch logs
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch logs');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Update pagination info
+                        totalPages = data.totalPages;
+                        pageInfo.textContent = `Showing page ${currentPage + 1} of ${totalPages || 1}`;
+                        
+                        // Update pagination buttons
+                        prevPageBtn.disabled = currentPage === 0;
+                        nextPageBtn.disabled = currentPage >= totalPages - 1;
+                        
+                        // Clear existing logs
+                        logsTableBody.innerHTML = '';
+                        
+                        // Check if logs exist
+                        if (data.content && data.content.length > 0) {
+                            // Populate table with logs
+                            data.content.forEach(log => {
+                                const row = document.createElement('tr');
+                                
+                                // Format timestamp
+                                const timestamp = new Date(log.timestamp);
+                                const formattedDate = timestamp.toLocaleDateString() + ' ' + timestamp.toLocaleTimeString();
+                                
+                                row.innerHTML = `
+                                    <td>${formattedDate}</td>
+                                    <td>${escapeHtml(log.email)}</td>
+                                    <td>${escapeHtml(log.action)}</td>
+                                    <td>${escapeHtml(log.ipAddress || '-')}</td>
+                                    <td class="details-cell" title="${escapeHtml(log.details)}">${escapeHtml(log.details)}</td>
+                                `;
+                                
+                                logsTableBody.appendChild(row);
+                            });
+                            
+                            logsTable.style.display = 'table';
+                            noLogs.style.display = 'none';
+                        } else {
+                            // Show no logs message
+                            logsTable.style.display = 'none';
+                            noLogs.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching logs:', error);
+                        noLogs.textContent = 'Error loading logs: ' + error.message;
+                        noLogs.style.display = 'block';
+                        logsTable.style.display = 'none';
+                    })
+                    .finally(() => {
+                        loading.style.display = 'none';
+                    });
+            }
+            
+            // Helper function to escape HTML
+            function escapeHtml(unsafe) {
+                if (!unsafe) return '';
+                return unsafe
+                    .toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+        });
+    </script>
+</body>
+</html>
