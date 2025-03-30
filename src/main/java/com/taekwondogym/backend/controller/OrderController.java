@@ -158,11 +158,15 @@ public class OrderController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error saving order: " + e.getMessage());
             }
             
-        } catch (Exception e) {
-            System.err.println("Unexpected error creating order: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + e.getMessage());
-        }
+} catch (Exception e) {
+    e.printStackTrace(); // ให้ Railway log ดูได้ด้วย
+
+    Map<String, Object> errorResponse = new HashMap<>();
+    errorResponse.put("message", e.getMessage());
+    errorResponse.put("type", e.getClass().getSimpleName());
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+}
     }
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderDetails(@PathVariable Long orderId) {
