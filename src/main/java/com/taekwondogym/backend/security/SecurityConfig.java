@@ -28,7 +28,7 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedOrigins(List.of(
     "https://adorable-freedom-production.up.railway.app", 
-    "https://project-front-6y8f.onrender.com/"
+    "https://project-front-6y8f.onrender.com"
                 
 )); // Frontend origin
             config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
