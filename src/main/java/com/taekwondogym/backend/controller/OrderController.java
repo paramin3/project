@@ -148,44 +148,22 @@ public class OrderController {
             }
 
             // Save order
-          try {
-    Order savedOrder = orderService.saveOrder(order, email);
-    cartService.clearCart(email, null);
-
-
-    List<OrderItemDTO> itemDTOs = savedOrder.getOrderItems().stream()
-        .map(item -> new OrderItemDTO(
-            item.getProduct().getName(),
-            item.getPrice(),
-            item.getQuantity()
-        ))
-        .toList();
-
-
-    OrderResponseDTO responseDTO = new OrderResponseDTO(
-        savedOrder.getName(),
-        savedOrder.getSurname(),
-        savedOrder.getTelephone(),
-        savedOrder.getDeliveryType(),
-        savedOrder.getTotalAmount(),
-        savedOrder.getOrderDate(),
-        itemDTOs
-    );
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
-
-} catch (Exception e) {
-    System.err.println("Unexpected error creating order: " + e.getMessage());
-    e.printStackTrace();
-
-
-    Map<String, Object> errorResponse = new HashMap<>();
-    errorResponse.put("message", e.getMessage());
-    errorResponse.put("type", e.getClass().getSimpleName());
-
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-}
-
+ try {
+                Order savedOrder = orderService.saveOrder(order, email);
+                cartService.clearCart(email, null);
+                return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
+            } catch (RuntimeException e) {
+                System.err.println("Error saving order: " + e.getMessage());
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error saving order: " + e.getMessage());
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Unexpected error creating order: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + e.getMessage());
+        }
+    }
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderDetails(@PathVariable Long orderId) {
         Optional<Order> order = orderService.findById(orderId);
