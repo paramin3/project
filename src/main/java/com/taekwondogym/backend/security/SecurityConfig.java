@@ -38,7 +38,7 @@ public class SecurityConfig {
             return config;
         }))
         .csrf(csrf -> csrf
-                .disable())
+                .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             		.requestMatchers("/", "/api/users/register", "/api/users/login").permitAll()
@@ -97,16 +97,18 @@ public class SecurityConfig {
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(true)
             )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-            );
+       .formLogin().disable() // ปิด form login เพื่อป้องกัน redirect 302
+        .logout(logout -> logout
+            .logoutUrl("/api/users/logout")
+            .logoutSuccessHandler((request, response, authentication) -> {
+                response.setStatus(HttpServletResponse.SC_OK);
+            })
+            .invalidateHttpSession(true)
+            .deleteCookies("JSESSIONID")
+        )
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+        );
 
         return http.build();
     }
