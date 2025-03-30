@@ -37,7 +37,6 @@ public class SecurityConfig {
             config.setMaxAge(3600L);
             return config;
         }))
-        .csrf(csrf -> csrf
                 .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -97,21 +96,21 @@ public class SecurityConfig {
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(true)
             )
-       .formLogin().disable() // ปิด form login เพื่อป้องกัน redirect 302
-        .logout(logout -> logout
-            .logoutUrl("/api/users/logout")
-            .logoutSuccessHandler((request, response, authentication) -> {
-                response.setStatus(HttpServletResponse.SC_OK);
-            })
-            .invalidateHttpSession(true)
-            .deleteCookies("JSESSIONID")
-        )
-        .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-        );
-
-        return http.build();
-    }
+      .formLogin().disable() 
+            .logout(logout -> logout
+                .logoutUrl("/api/users/logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(HttpServletResponse.SC_OK); 
+                })
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionFixation().migrateSession()
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(true)
+            );
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
