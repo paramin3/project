@@ -83,10 +83,8 @@ public class SecurityConfig {
             )
             .formLogin().disable()
             .logout(logout -> logout
-                .logoutUrl("/api/users/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_OK); // ไม่ redirect
-                })
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
             );
