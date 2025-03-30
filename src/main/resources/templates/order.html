@@ -44,7 +44,7 @@
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -59,7 +59,7 @@
 
 <body>
     <div class="container">
-    <h1>All Orders</h1>
+    <h1>คำสั่งซื้อทั้งหมด</h1>
         <div class="order-list" id="orderList"></div>
     </div>
 
@@ -155,12 +155,24 @@
             const orderList = document.getElementById("orderList");
             orderList.innerHTML = "";
 
+            // Sort by ID descending (newest first)
+            orders.sort((a, b) => b.id - a.id);
+
+            // Alternative: Sort by date if you prefer
+            // orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
             orders.forEach(order => {
                 const orderItem = document.createElement("div");
                 orderItem.className = "order-item";
-                orderItem.textContent = `Order ID: ${order.id}, Total Amount: ${order.totalAmount.toFixed(2)} ฿, Order Date & Time: ${formatDate(order.orderDate)}`;
+                orderItem.innerHTML = `
+                    <div class="order-header">
+                        <span class="order-id">Order #${order.id}</span>
+                        <span class="order-date">${formatDate(order.orderDate)}</span>
+                    </div>
+                    <div class="order-total">${order.totalAmount.toFixed(2)} ฿</div>
+                `;
                 
-                orderItem.addEventListener("click", function () {
+                orderItem.addEventListener("click", function() {
                     window.location.href = `/order-preview/${order.id}`;
                 });
 

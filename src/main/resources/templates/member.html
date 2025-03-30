@@ -142,54 +142,54 @@
         </ul>
     </nav>
 </header>
-<h1>Member Information</h1>
+<h1>ข้อมูลนักกีฬา</h1>
 
 <!-- Form to display and submit member information -->
 <form id="memberForm">
-    <label for="name">Name:</label>
+    <label for="name">ชื่อ:</label>
     <input type="text" id="name" required><br><br>
 
-    <label for="surname">Surname:</label>
+    <label for="surname">นามสกุล:</label>
     <input type="text" id="surname" required><br><br>
 
-    <label for="telephone">Telephone:</label>
+    <label for="telephone">เบอร์โทรศัพท์:</label>
     <input type="text" id="telephone" required><br><br>
 
-    <label for="thaiNationalId">Thai National ID:</label>
+    <label for="thaiNationalId">หมายเลขบัตรประชาชน:</label>
     <input type="text" id="thaiNationalId" required><br><br>
 
-    <label for="weight">Weight (kg):</label>
+    <label for="weight">น้ำหนัก (กิโลกรัม):</label>
     <input type="number" id="weight" required><br><br>
 
-    <label for="height">Height (cm):</label>
+    <label for="height">ส่วนสูง (เซนติเมตร):</label>
     <input type="number" id="height" required><br><br>
 
-    <label for="belts">Belts:</label>
+    <label for="belts">ระดับสาย:</label>
     <input type="text" id="belts" required><br><br>
 
-    <label for="gym">Gym:</label>
+    <label for="gym">โรงยิม:</label>
     <input type="text" id="gym" required><br><br>
 
-    <label for="city">City:</label>
+    <label for="city">จังหวัด:</label>
     <input type="text" id="city" required><br><br>
 
-    <button type="submit">Submit</button>
+    <button type="submit">ยืนยัน</button>
 </form>
 
 <!-- Admin functionality to load and edit any member form by Thai National ID -->
-<h2>Admin: Edit User's Member Form</h2>
-<label for="thaiId">Thai National ID:</label>
+<h2>ผู้ดูแล: ค้นหาและแก้ไขข้อมูลนักกีฬา</h2>
+<label for="thaiId">หมายเลขบัตรประชาชน:</label>
 <input type="text" id="thaiId" required>
-<button id="loadMemberButton">Load Member Form</button>
+<button id="loadMemberButton">ต้นหา</button>
 
 <!-- Admin functionality: View all members -->
-<h2>Admin: View All Members</h2>
-<button id="loadAllMembersButton">Load All Members</button>
+<h2>ผู้ดูแล: แสดงข้อมูลนักกีฬาทั้งหมด</h2>
+<button id="loadAllMembersButton">แสดงข้อมูล</button>
 <table border="1" id="membersTable" style="margin-top: 20px; width: 100%; border-collapse: collapse;">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Thai National ID</th>
+            <th>ชื่อ นามสกุล</th>
+            <th>หมายเลขบัตรประชาชน</th>
         </tr>
     </thead>
     <tbody>

@@ -120,7 +120,7 @@ nav ul li a:hover {
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -151,36 +151,36 @@ nav ul li a:hover {
                     const receipt = document.getElementById('receipt');
 
                     orderDetails.innerHTML = `
-                        <h2>Order Information</h2>
+                        <h2>รายละเอียดคำสั่งซื้อ</h2>
                         <p><strong>Order ID:</strong> ${order.id}</p>
-                        <p><strong>Name:</strong> ${order.name} ${order.surname}</p>
-                        <p><strong>Telephone:</strong> ${order.telephone}</p>
-                        <p><strong>Delivery Type:</strong> ${order.deliveryType}</p>
-                        <p><strong>Total Amount:</strong> ${order.totalAmount.toFixed(2)} ฿</p>
-                        <p><strong>Order Date & Time:</strong> ${formatDate(order.orderDate)}</p>
+                        <p><strong>ชื่อ นามสกุล:</strong> ${order.name} ${order.surname}</p>
+                        <p><strong>เบอร์โทรศัพท์:</strong> ${order.telephone}</p>
+                        <p><strong>ประเภทการจัดส่ง:</strong> ${order.deliveryType}</p>
+                        <p><strong>ยอดรวม:</strong> ${order.totalAmount.toFixed(2)} ฿</p>
+                        <p><strong>วันและเวลาคำสั่งซื้อ:</strong> ${formatDate(order.orderDate)}</p>
                     `;
 
                     if (order.deliveryType.toLowerCase() === "shipping") {
                         orderDetails.innerHTML += `
-                            <h3>Shipping Address</h3>
-                            <p><strong>Address:</strong> ${order.homeAddress}</p>
-                            <p><strong>Moo:</strong> ${order.moo || 'N/A'}</p>
-                            <p><strong>Soi:</strong> ${order.soi || 'N/A'}</p>
-                            <p><strong>Road:</strong> ${order.road || 'N/A'}</p>
-                            <p><strong>City:</strong> ${order.city}</p>
-                            <p><strong>District:</strong> ${order.district}</p>
-                            <p><strong>Sub-district:</strong> ${order.subDistrict}</p>
-                            <p><strong>Postcode:</strong> ${order.postcode}</p>
+                            <h3>รายละเอียดการจัดส่ง</h3>
+                            <p><strong>บ้านเลขที่:</strong> ${order.homeAddress}</p>
+                            <p><strong>หมู่:</strong> ${order.moo || 'N/A'}</p>
+                            <p><strong>ซอย:</strong> ${order.soi || 'N/A'}</p>
+                            <p><strong>ถนน:</strong> ${order.road || 'N/A'}</p>
+                            <p><strong>จังหวัด:</strong> ${order.city}</p>
+                            <p><strong>อำเภอ:</strong> ${order.district}</p>
+                            <p><strong>ตำบล:</strong> ${order.subDistrict}</p>
+                            <p><strong>รหัสไปรษณีย์:</strong> ${order.postcode}</p>
                         `;
                     }
 
-                    orderItems.innerHTML = `<h3>Order Items</h3>`;
+                    orderItems.innerHTML = `<h3>รายการสินค้า</h3>`;
                     order.orderItems.forEach(item => {
                         orderItems.innerHTML += `
                             <div class="order-item">
-                                <p><strong>Product:</strong> ${item.product.name}</p>
-                                <p><strong>Quantity:</strong> ${item.quantity}</p>
-                                <p><strong>Price:</strong> ${item.price.toFixed(2)} ฿</p>
+                                <p><strong>ชื่อสินค้า:</strong> ${item.product.name}</p>
+                                <p><strong>จำนวน:</strong> ${item.quantity}</p>
+                                <p><strong>ราคา:</strong> ${item.price.toFixed(2)} ฿</p>
                             </div>
                         `;
                     });

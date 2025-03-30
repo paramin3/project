@@ -107,7 +107,7 @@
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -121,34 +121,34 @@
 </header>
 <body>
 
-    <h1>Product Management</h1>
+    <h1>การจัดการสินค้า</h1>
 
     <form id="productForm" enctype="multipart/form-data">
-        <label for="name">Name:</label>
+        <label for="name">ชื่อสินค้า:</label>
         <input type="text" id="name" required><br><br>
 
-        <label for="description">Description:</label>
+        <label for="description">คำอธิบาย:</label>
         <textarea id="description" required></textarea><br><br>
 
-        <label for="price">Price:</label>
+        <label for="price">ราคา:</label>
         <input type="number" id="price" required min="0"><br><br>
         
-         <label for="cost">Cost:</label>
+         <label for="cost">ต้นทุน:</label>
         <input type="number" id="cost" required step="0.01"><br><br>
 
-        <label for="stock">Stock:</label>
+        <label for="stock">จำนวน:</label>
         <input type="number" id="stock" required min="0"><br><br>
 
-        <label for="images">Images:</label>
+        <label for="images">รูปภาพสินค้า	:</label>
         <input type="file" id="images" multiple accept="image/*" onchange="previewImages()"><br><br>
 
         <div id="image-previews"></div>
 
-        <button type="submit">Submit</button>
-        <button type="button" id="cancel-edit" style="display: none;">Cancel</button>
+        <button type="submit">ยืนยันการเพิ่มสินค้า</button>
+        <button type="button" id="cancel-edit" style="display: none;">ยกเลิก</button>
     </form>
 
-    <h2>Existing Products</h2>
+    <h2>รายชื่อสินค้า</h2>
     <div id="product-list"></div>
 
     <script>
@@ -167,16 +167,16 @@
                         div.innerHTML = `
                             <h3>${product.name}</h3>
                             <p>${product.description}</p>
-                            <p>Price: ${product.price} ฿</p>
-                            <p>Cost: ${product.cost} ฿</p>
-                            <p>Stock: ${product.stock}</p>
-                            <p>Availability: <span>${product.available ? 'Available' : 'Unavailable'}</span></p>
-                            <button onclick="toggleAvailability(${product.id})">${product.available ? 'Set Unavailable' : 'Set Available'}</button>
+                            <p>ราคา: ${product.price} ฿</p>
+                            <p>ต้นทุน: ${product.cost} ฿</p>
+                            <p>จำนวน: ${product.stock}</p>
+                            <p>สถานะ: <span>${product.available ? 'มีสินค้า' : 'สินค้าหมด'}</span></p>
+                            <button onclick="toggleAvailability(${product.id})">${product.available ? 'ตั้งค่าสถานะสินค้าหมด' : 'ตั้งค่าสถานะมีสินค้า'}</button>
                             <div>
                                 ${product.imagePaths.map(path => `<img src="/uploads/images/products/${path}" alt="${product.name}">`).join('')}
                             </div>
-                            <button onclick="editProduct(${product.id})">Edit</button>
-                            <button onclick="deleteProduct(${product.id})">Delete</button>
+                            <button onclick="editProduct(${product.id})">แก้ไข</button>
+                            <button onclick="deleteProduct(${product.id})">ลบ</button>
                         `;
                         productList.appendChild(div);
                     });

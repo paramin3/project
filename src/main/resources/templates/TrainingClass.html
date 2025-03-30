@@ -133,7 +133,7 @@
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -146,26 +146,26 @@
     </nav>
 </header>
 <body>
-    <h1>Training Class Management</h1>
+    <h1>การจัดการตารางเรียน</h1>
 
     <form id="trainingClassForm">
-        <label>Name:</label>
+        <label>ชื่อ:</label>
         <input type="text" id="name" required><br><br>
         
-        <label>Description:</label>
+        <label>คำอธิบาย:</label>
         <textarea id="description" required></textarea><br><br>
         
-        <label>Price:</label>
+        <label>ราคา:</label>
         <input type="number" id="price" required><br><br>
 
-        <label>Schedule:</label>
+        <label>เวลา(เช่น วันจันทร์-ศุกร์ 17.00 เป็นต้นไป):</label>
         <input type="text" id="schedule" required><br><br>
         
-        <button type="submit">Submit</button>
-        <button type="button" id="cancel-edit" style="display: none;">Cancel</button>
+        <button type="submit">ยืนยันการเพิ่มตารางเรียน</button>
+        <button type="button" id="cancel-edit" style="display: none;">ยกเลิกการแก้ไข</button>
     </form>
 
-    <h2>Existing Training Classes</h2>
+    <h2>รายชื่อคารางเรียน</h2>
     <div id="training-class-list"></div>
 
     <script>
@@ -186,8 +186,8 @@
                         <p>${trainingClass.description}</p>
                         <p>Price: ${trainingClass.price} ฿</p>
                         <p>Schedule: ${trainingClass.schedule}</p>
-                        <button onclick="editTrainingClass(${trainingClass.id})">Edit</button>
-                        <button onclick="deleteTrainingClass(${trainingClass.id})">Delete</button>
+                        <button onclick="editTrainingClass(${trainingClass.id})">แก้ไข</button>
+                        <button onclick="deleteTrainingClass(${trainingClass.id})">ลบ</button>
                     `;
                     trainingClassList.appendChild(div);
                 });

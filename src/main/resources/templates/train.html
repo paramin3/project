@@ -107,7 +107,7 @@
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -120,28 +120,28 @@
     </nav>
 </header>
 <body>
-    <h1>Trainer Management</h1>
+    <h1>การจัดการข้อมูลผู้สอน</h1>
 
     <form id="trainerForm" enctype="multipart/form-data">
-        <label for="name">Trainer Name:</label>
+        <label for="name">ชื่อผู้สอน:</label>
         <input type="text" id="name" name="name" required>
 
-        <label for="experience">Experience:</label>
+        <label for="experience">ประสบการณ์:</label>
         <textarea id="experience" name="experience" required></textarea>
 
-        <label for="awards">Awards (comma separated):</label>
+        <label for="awards">รางวัลที่เคยได้รับ (ใช้ , ในการแบ่ง):</label>
         <input type="text" id="awards" name="awards">
 
-        <label for="image">Image:</label>
+        <label for="image">รูปภาพผู้สอน:</label>
         <input type="file" id="image" name="image" accept="image/*" onchange="previewImage()">
 
         <div id="image-previews"></div>
 
-        <button type="submit">Submit</button>
-        <button type="button" id="cancel-edit" style="display: none;">Cancel</button>
+        <button type="submit">ยืนยันการเพิ่มผู้สอน</button>
+        <button type="button" id="cancel-edit" style="display: none;">ยกเลิกการแก้ไข</button>
     </form>
 
-    <h2>Existing Trainers</h2>
+    <h2>รายชื่อผู้สอน</h2>
     <div id="trainer-list"></div>
 
     <script>
@@ -164,8 +164,8 @@
                             <div>
                                 ${trainer.image ? `<img src="/uploads/images/trainers/${trainer.image}" alt="${trainer.name}">` : 'No image'}
                             </div>
-                            <button onclick="editTrainer(${trainer.id})">Edit</button>
-                            <button onclick="deleteTrainer(${trainer.id})">Delete</button>
+                            <button onclick="editTrainer(${trainer.id})">แก้ไข</button>
+                            <button onclick="deleteTrainer(${trainer.id})">ลบ</button>
                         `;
                         trainerList.appendChild(div);
                     });

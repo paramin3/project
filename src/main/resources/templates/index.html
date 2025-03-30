@@ -12,7 +12,7 @@
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -26,10 +26,10 @@
 </header>
 
 <main>
-    <h2>Monthly Sales Summary</h2>
-    <label for="product-select">Select Product:</label>
+    <h2>สรุปยอดขายรายเดือน</h2>
+    <label for="product-select">เลือกสินค้า:</label>
     <select id="product-select">
-        <option value="">All Products</option>
+        <option value="">ยอดขายทั้งหมด</option>
     </select>
 
     <canvas id="salesChart" width="400" height="200"></canvas>
@@ -86,7 +86,7 @@
                 data: {
                     labels: months,
                     datasets: [{
-                        label: productId ? 'Product Sales' : 'Total Sales',
+                        label: productId ? 'ต่อชิ้น' : 'ยอดรวม',
                         data: totalSales,
                         backgroundColor: 'rgba(75, 192, 192, 0.6)',
                         borderColor: 'rgba(75, 192, 192, 1)',
@@ -100,14 +100,14 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Sales Amount'
+                                text: 'ยอดขาย(บาท)'
                             }
                         }
                     },
                     plugins: {
                         title: {
                             display: true,
-                            text: productId ? 'Monthly Sales for Selected Product' : 'Monthly Sales for All Products'
+                            text: productId ? 'ยอดขายสินค้าเฉพาะต่อเดือน' : 'ยอดขายสินค้าทั้งหมดต่อเดือน'
                         }
                     }
                 }

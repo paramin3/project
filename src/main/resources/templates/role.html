@@ -131,7 +131,7 @@
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -143,17 +143,17 @@
         </ul>
     </nav>
 </header>
-    <h2>Change User Role</h2>
+    <h2>ปรับเปลี่ยนหน้าที่ผู้ใช้</h2>
     <form onsubmit="event.preventDefault(); changeUserRole();">
         <div>
-            <label for="userSelect">Select User (Email):</label>
+            <label for="userSelect">เลือกผู้ใช้  (Email):</label>
             <select id="userSelect" required>
                 <!-- Users will be populated here -->
             </select>
         </div>
 
         <div>
-            <label for="roleSelect">Select Role:</label>
+            <label for="roleSelect">เลือกหน้าที่:</label>
             <select id="roleSelect" required>
                 <option value="USER">User</option>
                 <option value="STAFF">Staff</option>
@@ -162,7 +162,7 @@
         </div>
 
         <div>
-            <button type="submit">Change Role</button>
+            <button type="submit">ยืนยันการเปลี่ยนแปลง</button>
         </div>
     </form>
     <script>

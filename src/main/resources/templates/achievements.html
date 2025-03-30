@@ -124,7 +124,7 @@
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -137,37 +137,40 @@
     </nav>
 </header>
 <body>
-    <h1>Achievement Management</h1>
+    <h1>การจัดการข่าวสาร</h1>
 
     <form id="achievementForm" enctype="multipart/form-data">
-        <label>Title:</label>
+        <label>ชื่อข่าว:</label>
         <input type="text" id="title" required><br><br>
         
-        <label>Description:</label>
+        <label>เน้ือหาข่าวสาร:</label>
         <textarea id="description" required></textarea><br><br>
         
-        <label>Images:</label>
+        <label>รูปภาพข่าว:</label>
         <input type="file" id="images" multiple accept="image/*" onchange="previewImages()"><br><br>
         
         <div id="image-previews"></div> <!-- Container for image previews -->
         
-        <button type="submit">Submit</button>
-        <button type="button" id="cancel-edit" style="display: none;">Cancel</button>
+        <button type="submit">ยืนยันการเพิ่มข่าวสาร</button>
+        <button type="button" id="cancel-edit" style="display: none;">ยกเลิกการแก้ไข</button>
     </form>
 
-    <h2>Existing Achievements</h2>
+    <h2>รายชื่อข่าวสาร</h2>
     <div id="achievement-list"></div>
 
     <script>
         let editingAchievementId = null;
 
-        // Load existing achievements
+     // Load existing achievements - MODIFIED VERSION
         function loadAchievements() {
             fetch('/api/achievements')
                 .then(response => response.json())
                 .then(achievements => {
                     const achievementList = document.getElementById('achievement-list');
                     achievementList.innerHTML = ''; // Clear previous achievements
+
+                    // Sort achievements by ID in descending order (newest first)
+                    achievements.sort((a, b) => b.id - a.id);
 
                     achievements.forEach(achievement => {
                         const div = document.createElement('div');
@@ -176,10 +179,12 @@
                             <p>${achievement.description}</p>
                             <p><small>Created At: ${new Date(achievement.createdAt).toLocaleString()}</small></p>
                             <div>
-                                ${achievement.imagePaths.map(path => `<img src="/uploads/images/achievements/${path}" alt="${achievement.title}">`).join('')}
+                                ${achievement.imagePaths.map(path => 
+                                    `<img src="/uploads/images/achievements/${path}" alt="${achievement.title}">`
+                                ).join('')}
                             </div>
-                            <button onclick="editAchievement(${achievement.id})">Edit</button>
-                            <button onclick="deleteAchievement(${achievement.id})">Delete</button>
+                            <button onclick="editAchievement(${achievement.id})">แก้ไข</button>
+                            <button onclick="deleteAchievement(${achievement.id})">ลบ</button>
                         `;
                         achievementList.appendChild(div);
                     });

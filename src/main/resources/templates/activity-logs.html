@@ -114,7 +114,7 @@
         <ul>
             <li><a href="/">หน้าหลัก</a></li>
             <li><a href="/role">การจัดการผู้ดูแล</a></li>
-            <li><a href="/member">ข้อทูลนักกีฬา</a></li>
+            <li><a href="/member">ข้อมูลนักกีฬา</a></li>
             <li><a href="/train">การจัดการผู้สอน</a></li>
             <li><a href="/classes">ตารางเรียน</a></li>
             <li><a href="/achievements">ข่าวสาร</a></li>
@@ -127,31 +127,31 @@
     </nav>
 </header>
 <body>
-    <h1>User Activity Logs</h1>
+    <h1>ประวัติการดำเนินการ</h1>
     
     <div class="filter-container">
-        <h2>Filters</h2>
+        <h2>การค้นหา</h2>
         <div class="filter-section">
             <div class="filter-group">
-			    <label for="email">Email:</label>
+			    <label for="email">อีเมล:</label>
 			    <input type="text" id="email" placeholder="Filter by email">
 			</div>
             <div class="filter-group">
-                <label for="action">Action:</label>
+                <label for="action">สถานะ(เพิ่ม, แก้ไข, ลบ):</label>
                 <input type="text" id="action" placeholder="e.g. POST, PUT, DELETE">
             </div>
             <div class="filter-group">
-                <label for="startDate">Start Date:</label>
+                <label for="startDate">วันแรก:</label>
                 <input type="datetime-local" id="startDate">
             </div>
             <div class="filter-group">
-                <label for="endDate">End Date:</label>
+                <label for="endDate">วันสุดท้าย:</label>
                 <input type="datetime-local" id="endDate">
             </div>
         </div>
         <div>
-            <button id="applyFilters">Apply Filters</button>
-            <button id="clearFilters" class="secondary">Clear Filters</button>
+            <button id="applyFilters">เริ่มการค้นหา</button>
+            <button id="clearFilters" class="secondary">ลบการกรอง</button>
         </div>
     </div>
     
@@ -160,11 +160,11 @@
         <table id="logsTable" style="display: none;">
             <thead>
                 <tr>
-                    <th>Timestamp</th>
-                    <th>Email</th>
-                    <th>Action</th>
+                    <th>วันเวลา</th>
+                    <th>อีเมล</th>
+                    <th>การกระทำ</th>
                     <th>IP Address</th>
-                    <th>Details</th>
+                    <th>รายละเอียด</th>
                 </tr>
             </thead>
             <tbody id="logsTableBody">
@@ -178,8 +178,8 @@
         <div class="pagination">
             <span id="pageInfo">Showing page 1 of 1</span>
             <div>
-                <button id="prevPage" disabled>Previous</button>
-                <button id="nextPage" disabled>Next</button>
+                <button id="prevPage" disabled>หน้าก่อนหน้า</button>
+                <button id="nextPage" disabled>หน้าถัดไป</button>
             </div>
         </div>
     </div>
