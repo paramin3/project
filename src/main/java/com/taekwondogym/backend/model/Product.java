@@ -29,7 +29,6 @@ public class Product {
     @ElementCollection
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_path")
-    @OneToMany(fetch = FetchType.EAGER) 
 private List<String> imagePaths;
     private boolean available = true;
 
