@@ -78,7 +78,10 @@ public class ActivityLogAspect {
             
             // Build action and details
             String action = httpMethod + " " + path;
-            String details = "Path Variables: [" + pathVars + "], Body: " + requestDetails.trim();
+           String details = "Path Variables: [" + pathVars + "], Body: " + requestDetails.trim();
+if (details.length() > 1000) {
+    details = details.substring(0, 1000) + "...[truncated]";
+}
             
             // Log the activity
             activityLogService.logActivity(action, details);
