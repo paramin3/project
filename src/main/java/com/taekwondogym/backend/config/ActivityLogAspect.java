@@ -90,7 +90,7 @@ public class ActivityLogAspect {
     public void logException(JoinPoint joinPoint, Exception exception) {
         String action = "EXCEPTION " + request.getMethod() + " " + request.getRequestURI();
         String details = "Exception: " + exception.getClass().getName() + " - " + exception.getMessage();
-        details = trimLog(details, 1000); // 💡 Limit to 1000 chars
+        details = trimLog(details, 1000); 
 
         activityLogService.logActivity(action, details);
     }
