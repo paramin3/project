@@ -317,6 +317,7 @@
         function toggleAvailability(id) {
             fetch(`/api/products/${id}/toggle-availability`, {
                 method: 'PATCH'
+                credentials: 'include'
             }).then(response => {
                 if (response.ok) {
                     alert('Product availability updated');
