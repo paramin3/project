@@ -173,7 +173,18 @@ try {
 
     return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 
-}  catch (Exception e) {
+}catch (RuntimeException e) {
+    System.err.println("Error saving order: " + e.getMessage());
+    e.printStackTrace();
+
+    Map<String, Object> errorResponse = Map.of(
+        "message", e.getMessage(),
+        "type", e.getClass().getSimpleName()
+    );
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+}
+            
+ } catch (Exception e) {
     System.err.println("Unexpected error creating order: " + e.getMessage());
     e.printStackTrace();
 
@@ -183,14 +194,6 @@ try {
     );
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 }
-            
-        } catch (Exception e) {
-            System.err.println("Unexpected error creating order: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + e.getMessage());
-        }
-    }
-
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderDetails(@PathVariable Long orderId) {
         Optional<Order> order = orderService.findById(orderId);
