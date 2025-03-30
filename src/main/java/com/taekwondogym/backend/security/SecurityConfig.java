@@ -29,7 +29,7 @@ public class SecurityConfig {
                     "https://adorable-freedom-production.up.railway.app", 
                     "https://project-front-6y8f.onrender.com"
                 ));
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
                 config.setAllowCredentials(true);
                 config.setMaxAge(3600L);
