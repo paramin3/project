@@ -315,23 +315,30 @@
 
         // Toggle product availability
 function toggleAvailability(id) {
-    fetch(`/api/products/${id}/toggle-availability`, {
-        method: 'PATCH',
-        credentials: 'include'
-    }).then(response => {
-        if (response.status === 401) {
-            alert('Please log in as an authorized user');
-            window.location.href = '/login';
-        } else if (response.status === 403) {
-            alert('You do not have permission to perform this action');
-        } else if (response.ok) {
-            alert('Product availability updated');
-            loadProducts();
-        } else {
-            alert('Failed to update availability');
-        }
-    }).catch(error => console.error('Error:', error));
-}
+        console.log('Toggle called for product ID:', id);
+        fetch(`/api/products/${id}/toggle-availability`, {
+            method: 'PATCH',
+            credentials: 'include'
+        }).then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', [...response.headers.entries()]);
+            return response.text().then(text => {
+                console.log('Response body:', text);
+                if (response.status === 401) {
+                    alert('Please log in as an authorized user');
+                    window.location.href = '/login';
+                } else if (response.status === 403) {
+                    alert('You do not have permission to perform this action');
+                    console.log('Check server logs for "Access denied" or "Authentication failed" messages');
+                } else if (response.ok) {
+                    alert('Product availability updated');
+                    loadProducts();
+                } else {
+                    alert('Failed to update availability: ' + response.status);
+                }
+            });
+        }).catch(error => console.error('Error toggling availability:', error));
+    }
 
         // Reset form after submission
         function resetForm() {
