@@ -316,7 +316,7 @@
         // Toggle product availability
         function toggleAvailability(id) {
             fetch(`/api/products/${id}/toggle-availability`, {
-                method: 'PATCH'
+                method: 'PATCH',
                 credentials: 'include'
             }).then(response => {
                 if (response.ok) {
