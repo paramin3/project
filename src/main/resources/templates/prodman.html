@@ -315,19 +315,22 @@
 
         // Toggle product availability
 function toggleAvailability(id) {
-    console.log('Toggle called for product ID:', id);
     fetch(`/api/products/${id}/toggle-availability`, {
         method: 'PATCH',
         credentials: 'include'
     }).then(response => {
-        console.log('Response status:', response.status);
-        if (response.ok) {
+        if (response.status === 401) {
+            alert('Please log in as an authorized user');
+            window.location.href = '/login';
+        } else if (response.status === 403) {
+            alert('You do not have permission to perform this action');
+        } else if (response.ok) {
             alert('Product availability updated');
             loadProducts();
         } else {
             alert('Failed to update availability');
         }
-    }).catch(error => console.error('Error toggling availability:', error));
+    }).catch(error => console.error('Error:', error));
 }
 
         // Reset form after submission
