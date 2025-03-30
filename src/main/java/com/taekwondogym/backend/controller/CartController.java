@@ -64,13 +64,14 @@ public class CartController {
                 System.out.println("[CartController] New Session ID generated: " + sessionId);
 
                 // Store in cookie
-                Cookie cookie = new Cookie("sessionId", sessionId);
-                cookie.setHttpOnly(true);
-                cookie.setPath("/");
-                cookie.setMaxAge(60 * 60 * 24); // 1 day
-                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                        .getResponse().addCookie(cookie);
-                System.out.println("[CartController] Stored new Session ID in cookie: " + sessionId);
+String cookieHeader = String.format(
+    "sessionId=%s; Path=/; Max-Age=%d; Secure; HttpOnly; SameSite=None",
+    sessionId, 60 * 60 * 24
+);
+((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+        .getResponse().addHeader("Set-Cookie", cookieHeader);
+System.out.println("[CartController] Stored new Session ID in cookie header: " + cookieHeader);
+
             }
         }
 
