@@ -314,19 +314,21 @@
         });
 
         // Toggle product availability
-        function toggleAvailability(id) {
-            fetch(`/api/products/${id}/toggle-availability`, {
-                method: 'PATCH',
-                credentials: 'include'
-            }).then(response => {
-                if (response.ok) {
-                    alert('Product availability updated');
-                    loadProducts();
-                } else {
-                    alert('Failed to update availability');
-                }
-            }).catch(error => console.error('Error toggling availability:', error));
+function toggleAvailability(id) {
+    console.log('Toggle called for product ID:', id);
+    fetch(`/api/products/${id}/toggle-availability`, {
+        method: 'PATCH',
+        credentials: 'include'
+    }).then(response => {
+        console.log('Response status:', response.status);
+        if (response.ok) {
+            alert('Product availability updated');
+            loadProducts();
+        } else {
+            alert('Failed to update availability');
         }
+    }).catch(error => console.error('Error toggling availability:', error));
+}
 
         // Reset form after submission
         function resetForm() {
