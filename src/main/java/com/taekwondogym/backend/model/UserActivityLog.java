@@ -1,7 +1,7 @@
 package com.taekwondogym.backend.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "user_activity_logs")
@@ -20,7 +20,7 @@ public class UserActivityLog {
     private String ipAddress;
 
     @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
 
 @Column(name = "details", length = 1000)
 private String details;
@@ -32,7 +32,7 @@ private String details;
         this.email = email;
         this.action = action;
         this.ipAddress = ipAddress;
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = ZonedDateTime.now();
         this.details = details;
     }
 
@@ -69,11 +69,11 @@ private String details;
         this.ipAddress = ipAddress;
     }
 
-    public LocalDateTime getTimestamp() {
+    public ZonedDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(ZonedDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
