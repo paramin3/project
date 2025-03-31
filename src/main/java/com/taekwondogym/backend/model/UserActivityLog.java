@@ -1,9 +1,7 @@
 package com.taekwondogym.backend.model;
 
 import jakarta.persistence.*;
-import java.time.ZonedDateTime;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_activity_logs")
@@ -22,10 +20,9 @@ public class UserActivityLog {
     private String ipAddress;
 
     @Column(name = "timestamp", nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Bangkok")
-    private ZonedDateTime timestamp;
-    
-    @Column(name = "details", length = 1000)
+    private LocalDateTime timestamp;
+
+    @Column(name = "details")
     private String details;
 
     // Constructors
@@ -35,7 +32,7 @@ public class UserActivityLog {
         this.email = email;
         this.action = action;
         this.ipAddress = ipAddress;
-        this.timestamp = ZonedDateTime.now(ZoneId.of("Asia/Bangkok"));
+        this.timestamp = LocalDateTime.now();
         this.details = details;
     }
 
@@ -72,11 +69,11 @@ public class UserActivityLog {
         this.ipAddress = ipAddress;
     }
 
-    public ZonedDateTime getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(ZonedDateTime timestamp) {
+    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
