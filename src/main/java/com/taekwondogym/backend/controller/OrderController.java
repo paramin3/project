@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.time.ZoneId;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -83,7 +83,7 @@ public class OrderController {
             order.setTelephone(telephone);
             order.setDeliveryType(deliveryType);
             order.setTotalAmount(totalAmount);
-            order.setOrderDate(LocalDateTime.now());
+            order.setOrderDate(LocalDateTime.now(ZoneId.of("Asia/Bangkok")));
 
             // Handle shipping address
             if ("shipping".equalsIgnoreCase(deliveryType)) {
