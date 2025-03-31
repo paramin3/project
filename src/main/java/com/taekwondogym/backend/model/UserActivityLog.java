@@ -34,7 +34,7 @@ public class UserActivityLog {
         this.email = email;
         this.action = action;
         this.ipAddress = ipAddress;
-        this.timestamp = ZonedDateTime.now();
+        this.timestamp = ZonedDateTime.now(ZoneId.of("Asia/Bangkok"));
         this.details = details;
     }
 
