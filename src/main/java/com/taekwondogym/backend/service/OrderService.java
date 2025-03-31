@@ -20,7 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +65,7 @@ public class OrderService {
         }
 
         order.setUser(user); // Associate order with the user
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now(ZoneId.of("Asia/Bangkok")));
 
         // Save the order
         Order savedOrder = orderRepository.save(order);
