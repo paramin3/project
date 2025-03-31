@@ -21,7 +21,8 @@ public class UserActivityLogService {
     
     @Autowired
     private HttpServletRequest request;
-
+    
+     private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
     public void logActivity(String action, String details) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth != null && auth.isAuthenticated() ? auth.getName() : "anonymous";
@@ -35,8 +36,11 @@ public class UserActivityLogService {
         return activityLogRepository.findByEmail(email, pageable);
     }
     
-    public Page<UserActivityLog> getActivityLogsInDateRange(ZonedDateTime start, ZonedDateTime end, Pageable pageable) {
-        return activityLogRepository.findByTimestampBetween(start, end, pageable);
+  public Page<UserActivityLog> getActivityLogsInDateRange(ZonedDateTime start, ZonedDateTime end, Pageable pageable) {
+        // Ensure the dates are treated in Asia/Bangkok time
+        ZonedDateTime startInBangkok = start.withZoneSameInstant(BANGKOK_ZONE);
+        ZonedDateTime endInBangkok = end.withZoneSameInstant(BANGKOK_ZONE);
+        return activityLogRepository.findByTimestampBetween(startInBangkok, endInBangkok, pageable);
     }
     
     public Page<UserActivityLog> getActivityLogsByAction(String action, Pageable pageable) {
