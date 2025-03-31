@@ -31,14 +31,20 @@ private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
         return ResponseEntity.ok(activityLogService.getUserActivityLogs(email, pageable));
     }
 
-@GetMapping("/date-range")
+    @GetMapping("/date-range")
     public ResponseEntity<Page<UserActivityLog>> getActivityLogsByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
             Pageable pageable) {
+        
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+        
         ZonedDateTime startInBangkok = start.withZoneSameInstant(BANGKOK_ZONE);
         ZonedDateTime endInBangkok = end.withZoneSameInstant(BANGKOK_ZONE);
-        return ResponseEntity.ok(activityLogService.getActivityLogsInDateRange(startInBangkok, endInBangkok, pageable));
+        return ResponseEntity.ok(activityLogService.getActivityLogsInDateRange(
+            startInBangkok, endInBangkok, pageable));
     }
 
     @GetMapping("/action/{action}")
