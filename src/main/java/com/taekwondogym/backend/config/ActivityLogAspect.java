@@ -38,54 +38,54 @@ public class ActivityLogAspect {
     @Pointcut("execution(* com.taekwondogym.backend.controller.*.*(..))")
     public void controllerMethods() {}
 
-    @AfterReturning(pointcut = "controllerMethods() && (@annotation(org.springframework.web.bind.annotation.PostMapping) || " +
-            "@annotation(org.springframework.web.bind.annotation.PutMapping) || " +
-            "@annotation(org.springframework.web.bind.annotation.DeleteMapping))", returning = "result")
+    @AfterReturning(pointcut = "controllerMethods() && (@annotation(PostMapping) || " +
+            "@annotation(PutMapping) || @annotation(DeleteMapping))", returning = "result")
     public void logActivity(JoinPoint joinPoint, Object result) {
         try {
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
             Method method = signature.getMethod();
 
-            String httpMethod = "";
-            if (method.isAnnotationPresent(PostMapping.class)) {
-                httpMethod = "POST";
-            } else if (method.isAnnotationPresent(PutMapping.class)) {
-                httpMethod = "PUT";
-            } else if (method.isAnnotationPresent(DeleteMapping.class)) {
-                httpMethod = "DELETE";
-            }
-
+            String httpMethod = request.getMethod(); // More reliable than annotation check
             String path = request.getRequestURI();
 
-            String pathVars = Arrays.stream(signature.getParameterNames())
-                    .filter(param -> joinPoint.getArgs()[Arrays.asList(signature.getParameterNames()).indexOf(param)] != null)
-                    .map(param -> param + "=" + joinPoint.getArgs()[Arrays.asList(signature.getParameterNames()).indexOf(param)])
+            // Safely handle path variables
+            String pathVars = "";
+            if (signature.getParameterNames() != null) {
+                pathVars = IntStream.range(0, joinPoint.getArgs().length)
+                    .filter(i -> joinPoint.getArgs()[i] != null)
+                    .mapToObj(i -> signature.getParameterNames()[i] + "=" + joinPoint.getArgs()[i])
                     .collect(Collectors.joining(", "));
-
-            String requestDetails = "";
-            try {
-                Object[] args = joinPoint.getArgs();
-                for (Object arg : args) {
-                    if (arg != null && !arg.getClass().isPrimitive() && !(arg instanceof String)
-                            && !(arg instanceof Number) && !(arg instanceof Boolean) && !(arg instanceof Pageable)) {
-                        requestDetails += objectMapper.writeValueAsString(arg) + " ";
-                    }
-                }
-            } catch (Exception e) {
-                requestDetails = "Failed to serialize request body: " + e.getMessage();
             }
 
+            // Safely handle request body
+            String requestDetails = Arrays.stream(joinPoint.getArgs())
+                .filter(arg -> arg != null && !isSimpleValueType(arg.getClass()))
+                .map(arg -> {
+                    try {
+                        return objectMapper.writeValueAsString(arg);
+                    } catch (JsonProcessingException e) {
+                        return "Unserializable: " + arg.toString();
+                    }
+                })
+                .collect(Collectors.joining(" "));
+
             String action = httpMethod + " " + path;
-            String details = "Path Variables: [" + pathVars + "], Body: " + requestDetails.trim();
-            details = trimLog(details, 1000); 
+            String details = "Params: [" + pathVars + "]" + 
+                          (requestDetails.isEmpty() ? "" : " Body: " + requestDetails);
+            details = trimLog(details, 1000);
 
             activityLogService.logActivity(action, details);
-
         } catch (Exception e) {
-            System.err.println("Error in activity logging: " + e.getMessage());
+            log.error("Activity logging failed", e);
         }
     }
 
+    private boolean isSimpleValueType(Class<?> clazz) {
+        return clazz.isPrimitive() || String.class.isAssignableFrom(clazz) ||
+               Number.class.isAssignableFrom(clazz) || Boolean.class.isAssignableFrom(clazz) ||
+               Pageable.class.isAssignableFrom(clazz);
+    }
+    
     @AfterThrowing(pointcut = "controllerMethods()", throwing = "exception")
     public void logException(JoinPoint joinPoint, Exception exception) {
         String action = "EXCEPTION " + request.getMethod() + " " + request.getRequestURI();
