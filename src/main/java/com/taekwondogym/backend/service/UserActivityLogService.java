@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -35,7 +35,7 @@ public class UserActivityLogService {
         return activityLogRepository.findByEmail(email, pageable);
     }
     
-    public Page<UserActivityLog> getActivityLogsInDateRange(LocalDateTime start, LocalDateTime end, Pageable pageable) {
+    public Page<UserActivityLog> getActivityLogsInDateRange(ZonedDateTime start, ZonedDateTime end, Pageable pageable) {
         return activityLogRepository.findByTimestampBetween(start, end, pageable);
     }
     
