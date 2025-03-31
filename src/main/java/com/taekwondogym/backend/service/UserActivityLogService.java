@@ -22,15 +22,18 @@ public class UserActivityLogService {
     @Autowired
     private HttpServletRequest request;
     
-     private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
+    private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
+    
     public void logActivity(String action, String details) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth != null && auth.isAuthenticated() ? auth.getName() : "anonymous";
+        String email = auth != null && auth.isAuthenticated() ? 
+                     auth.getName() : "anonymous";
         String ipAddress = extractIpAddress(request);
         
+        // Constructor already sets Bangkok time
         UserActivityLog log = new UserActivityLog(email, action, ipAddress, details);
         activityLogRepository.save(log);
-            }
+    }
     
     public Page<UserActivityLog> getUserActivityLogs(String email, Pageable pageable) {
         return activityLogRepository.findByEmail(email, pageable);
