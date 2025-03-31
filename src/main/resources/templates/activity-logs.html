@@ -198,16 +198,25 @@
             
             let currentPage = 0;
             let totalPages = 0;
-            
-            // Initial load
+
+            // Helper: convert local datetime to ISO +07:00
+            function toBangkokISOString(dateStr) {
+                const date = new Date(dateStr);
+                const offset = -date.getTimezoneOffset();
+                const pad = n => n.toString().padStart(2, '0');
+                const sign = offset >= 0 ? '+' : '-';
+                const hours = pad(Math.floor(Math.abs(offset) / 60));
+                const minutes = pad(Math.abs(offset) % 60);
+                return date.toISOString().split('.')[0] + sign + hours + ':' + minutes;
+            }
+
             fetchLogs();
-            
-            // Event listeners
+
             applyFiltersBtn.addEventListener('click', function() {
                 currentPage = 0;
                 fetchLogs();
             });
-            
+
             clearFiltersBtn.addEventListener('click', function() {
                 document.getElementById('email').value = '';
                 document.getElementById('action').value = '';
@@ -216,52 +225,43 @@
                 currentPage = 0;
                 fetchLogs();
             });
-            
+
             prevPageBtn.addEventListener('click', function() {
                 if (currentPage > 0) {
                     currentPage--;
                     fetchLogs();
                 }
             });
-            
+
             nextPageBtn.addEventListener('click', function() {
                 if (currentPage < totalPages - 1) {
                     currentPage++;
                     fetchLogs();
                 }
             });
-            
-            // Fetch logs function
+
             function fetchLogs() {
-                // Show loading indicator
                 loading.style.display = 'block';
                 logsTable.style.display = 'none';
                 noLogs.style.display = 'none';
-                
-                // Get filter values
+
                 const email = document.getElementById('email').value;
                 const action = document.getElementById('action').value;
                 const startDate = document.getElementById('startDate').value;
                 const endDate = document.getElementById('endDate').value;
-                const formattedStartDate = toBangkokISOString(startDate);
-		const formattedEndDate = toBangkokISOString(endDate);
-		    
 
-                // Build URL based on filters
                 let url = `/api/activity-logs?page=${currentPage}&size=10&sort=timestamp,desc`;
-                
+
                 if (email) {
                     url = `/api/activity-logs/user/${email}?page=${currentPage}&size=10&sort=timestamp,desc`;
                 } else if (action) {
                     url = `/api/activity-logs/action/${action}?page=${currentPage}&size=10&sort=timestamp,desc`;
                 } else if (startDate && endDate) {
-                    // Format date for API
-                    const formattedStartDate = new Date(startDate).toISOString();
-                    const formattedEndDate = new Date(endDate).toISOString();
+                    const formattedStartDate = toBangkokISOString(startDate);
+                    const formattedEndDate = toBangkokISOString(endDate);
                     url = `/api/activity-logs/date-range?start=${formattedStartDate}&end=${formattedEndDate}&page=${currentPage}&size=10&sort=timestamp,desc`;
                 }
-                
-                // Fetch logs
+
                 fetch(url)
                     .then(response => {
                         if (!response.ok) {
@@ -270,27 +270,18 @@
                         return response.json();
                     })
                     .then(data => {
-                        // Update pagination info
                         totalPages = data.totalPages;
                         pageInfo.textContent = `Showing page ${currentPage + 1} of ${totalPages || 1}`;
-                        
-                        // Update pagination buttons
                         prevPageBtn.disabled = currentPage === 0;
                         nextPageBtn.disabled = currentPage >= totalPages - 1;
-                        
-                        // Clear existing logs
                         logsTableBody.innerHTML = '';
-                        
-                        // Check if logs exist
+
                         if (data.content && data.content.length > 0) {
-                            // Populate table with logs
                             data.content.forEach(log => {
                                 const row = document.createElement('tr');
-                                
-                                // Format timestamp
                                 const timestamp = new Date(log.timestamp);
                                 const formattedDate = timestamp.toLocaleDateString() + ' ' + timestamp.toLocaleTimeString();
-                                
+
                                 row.innerHTML = `
                                     <td>${formattedDate}</td>
                                     <td>${escapeHtml(log.email)}</td>
@@ -298,14 +289,12 @@
                                     <td>${escapeHtml(log.ipAddress || '-')}</td>
                                     <td class="details-cell" title="${escapeHtml(log.details)}">${escapeHtml(log.details)}</td>
                                 `;
-                                
                                 logsTableBody.appendChild(row);
                             });
-                            
+
                             logsTable.style.display = 'table';
                             noLogs.style.display = 'none';
                         } else {
-                            // Show no logs message
                             logsTable.style.display = 'none';
                             noLogs.style.display = 'block';
                         }
@@ -320,16 +309,7 @@
                         loading.style.display = 'none';
                     });
             }
-            function toBangkokISOString(dateStr) {
-    const date = new Date(dateStr);
-    const offset = -date.getTimezoneOffset(); // in minutes
-    const pad = n => n.toString().padStart(2, '0');
-    const sign = offset >= 0 ? '+' : '-';
-    const hours = pad(Math.floor(Math.abs(offset) / 60));
-    const minutes = pad(Math.abs(offset) % 60);
-    return date.toISOString().split('.')[0] + sign + hours + ':' + minutes;
-}
-            // Helper function to escape HTML
+
             function escapeHtml(unsafe) {
                 if (!unsafe) return '';
                 return unsafe
@@ -342,5 +322,6 @@
             }
         });
     </script>
+
 </body>
 </html>
