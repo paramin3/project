@@ -22,7 +22,7 @@ public class UserActivityLog {
     private String ipAddress;
 
     @Column(name = "timestamp", nullable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Bangkok")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Bangkok")
     private ZonedDateTime timestamp;
     
     @Column(name = "details", length = 1000)
