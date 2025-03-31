@@ -9,8 +9,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+
+import java.time.LocalDateTime;
 import org.springframework.data.domain.Sort;
 
 @RestController
@@ -18,7 +18,7 @@ import org.springframework.data.domain.Sort;
 public class UserActivityLogController {
     @Autowired
     private UserActivityLogService activityLogService;
-private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
+
     @GetMapping
     public ResponseEntity<Page<UserActivityLog>> getAllActivityLogs(
             @PageableDefault(size = 10, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -33,18 +33,10 @@ private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
 
     @GetMapping("/date-range")
     public ResponseEntity<Page<UserActivityLog>> getActivityLogsByDateRange(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
             Pageable pageable) {
-        
-        if (start.isAfter(end)) {
-            throw new IllegalArgumentException("Start date must be before end date");
-        }
-        
-        ZonedDateTime startInBangkok = start.withZoneSameInstant(BANGKOK_ZONE);
-        ZonedDateTime endInBangkok = end.withZoneSameInstant(BANGKOK_ZONE);
-        return ResponseEntity.ok(activityLogService.getActivityLogsInDateRange(
-            startInBangkok, endInBangkok, pageable));
+        return ResponseEntity.ok(activityLogService.getActivityLogsInDateRange(start, end, pageable));
     }
 
     @GetMapping("/action/{action}")
