@@ -1,5 +1,6 @@
 package com.taekwondogym.backend.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taekwondogym.backend.service.UserActivityLogService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,11 +15,15 @@ import org.springframework.web.bind.annotation.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Aspect
 @Component
 public class ActivityLogAspect {
-
+	private static final Logger log = LoggerFactory.getLogger(ActivityLogAspect.class);
+	
     @Autowired
     private UserActivityLogService activityLogService;
 
