@@ -28,7 +28,8 @@ public class UserActivityLogService {
         String email = auth != null && auth.isAuthenticated() ? auth.getName() : "anonymous";
         String ipAddress = extractIpAddress(request);
         
-        UserActivityLog log = new UserActivityLog(email, action, ipAddress, details);
+UserActivityLog log = new UserActivityLog(email, action, ipAddress, details);
+        log.setTimestamp(ZonedDateTime.now(BANGKOK_ZONE));
         activityLogRepository.save(log);
     }
     
