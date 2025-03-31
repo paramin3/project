@@ -3,6 +3,7 @@ package com.taekwondogym.backend.model;
 import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "user_activity_logs")
