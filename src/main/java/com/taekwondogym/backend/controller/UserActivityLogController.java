@@ -18,7 +18,7 @@ import org.springframework.data.domain.Sort;
 public class UserActivityLogController {
     @Autowired
     private UserActivityLogService activityLogService;
-
+private static final ZoneId BANGKOK_ZONE = ZoneId.of("Asia/Bangkok");
     @GetMapping
     public ResponseEntity<Page<UserActivityLog>> getAllActivityLogs(
             @PageableDefault(size = 10, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -32,17 +32,14 @@ public class UserActivityLogController {
     }
 
 @GetMapping("/date-range")
-public ResponseEntity<Page<UserActivityLog>> getActivityLogsByDateRange(
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
-        Pageable pageable) {
-
-    ZoneId bangkokZone = ZoneId.of("Asia/Bangkok");
-    ZonedDateTime startInBangkok = start.withZoneSameInstant(bangkokZone);
-    ZonedDateTime endInBangkok = end.withZoneSameInstant(bangkokZone);
-
-    return ResponseEntity.ok(activityLogService.getActivityLogsInDateRange(startInBangkok, endInBangkok, pageable));
-}
+    public ResponseEntity<Page<UserActivityLog>> getActivityLogsByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
+            Pageable pageable) {
+        ZonedDateTime startInBangkok = start.withZoneSameInstant(BANGKOK_ZONE);
+        ZonedDateTime endInBangkok = end.withZoneSameInstant(BANGKOK_ZONE);
+        return ResponseEntity.ok(activityLogService.getActivityLogsInDateRange(startInBangkok, endInBangkok, pageable));
+    }
 
     @GetMapping("/action/{action}")
     public ResponseEntity<Page<UserActivityLog>> getActivityLogsByAction(
