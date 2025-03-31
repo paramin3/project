@@ -10,7 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import org.springframework.data.domain.Sort;
 
 @RestController
@@ -33,8 +33,8 @@ public class UserActivityLogController {
 
     @GetMapping("/date-range")
     public ResponseEntity<Page<UserActivityLog>> getActivityLogsByDateRange(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end,
             Pageable pageable) {
         return ResponseEntity.ok(activityLogService.getActivityLogsInDateRange(start, end, pageable));
     }
