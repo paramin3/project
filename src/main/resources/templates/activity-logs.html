@@ -185,143 +185,172 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const logsTable = document.getElementById('logsTable');
-            const logsTableBody = document.getElementById('logsTableBody');
-            const loading = document.getElementById('loading');
-            const noLogs = document.getElementById('noLogs');
-            const pageInfo = document.getElementById('pageInfo');
-            const prevPageBtn = document.getElementById('prevPage');
-            const nextPageBtn = document.getElementById('nextPage');
-            const applyFiltersBtn = document.getElementById('applyFilters');
-            const clearFiltersBtn = document.getElementById('clearFilters');
+    document.addEventListener('DOMContentLoaded', function() {
+        const logsTable = document.getElementById('logsTable');
+        const logsTableBody = document.getElementById('logsTableBody');
+        const loading = document.getElementById('loading');
+        const noLogs = document.getElementById('noLogs');
+        const pageInfo = document.getElementById('pageInfo');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const applyFiltersBtn = document.getElementById('applyFilters');
+        const clearFiltersBtn = document.getElementById('clearFilters');
+        
+        let currentPage = 0;
+        let totalPages = 0;
+
+        // Helper: Format date in Bangkok timezone (GMT+7)
+        function formatBangkokTime(dateString) {
+            if (!dateString) return '';
             
-            let currentPage = 0;
-            let totalPages = 0;
+            const date = new Date(dateString);
+            const options = {
+                timeZone: 'Asia/Bangkok',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            
+            // Format as "YYYY-MM-DD HH:MM:SS"
+            const formatted = date.toLocaleString('en-US', options);
+            const [datePart, timePart] = formatted.split(', ');
+            const [month, day, year] = datePart.split('/');
+            
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${timePart}`;
+        }
 
-            // Helper: convert local datetime to ISO +07:00
-            function toBangkokISOString(dateStr) {
-                const date = new Date(dateStr);
-                const offset = -date.getTimezoneOffset();
-                const pad = n => n.toString().padStart(2, '0');
-                const sign = offset >= 0 ? '+' : '-';
-                const hours = pad(Math.floor(Math.abs(offset) / 60));
-                const minutes = pad(Math.abs(offset) % 60);
-                return date.toISOString().split('.')[0] + sign + hours + ':' + minutes;
-            }
+        // Helper: Convert local datetime to Bangkok timezone for API requests
+        function toBangkokISOString(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const bangkokOffset = 7 * 60 * 60 * 1000; // GMT+7 in milliseconds
+            const bangkokTime = new Date(date.getTime() + date.getTimezoneOffset() * 60000 + bangkokOffset);
+            return bangkokTime.toISOString().slice(0, 19) + '+07:00';
+        }
 
+        fetchLogs();
+
+        applyFiltersBtn.addEventListener('click', function() {
+            currentPage = 0;
             fetchLogs();
+        });
 
-            applyFiltersBtn.addEventListener('click', function() {
-                currentPage = 0;
+        clearFiltersBtn.addEventListener('click', function() {
+            document.getElementById('email').value = '';
+            document.getElementById('action').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            currentPage = 0;
+            fetchLogs();
+        });
+
+        prevPageBtn.addEventListener('click', function() {
+            if (currentPage > 0) {
+                currentPage--;
                 fetchLogs();
-            });
-
-            clearFiltersBtn.addEventListener('click', function() {
-                document.getElementById('email').value = '';
-                document.getElementById('action').value = '';
-                document.getElementById('startDate').value = '';
-                document.getElementById('endDate').value = '';
-                currentPage = 0;
-                fetchLogs();
-            });
-
-            prevPageBtn.addEventListener('click', function() {
-                if (currentPage > 0) {
-                    currentPage--;
-                    fetchLogs();
-                }
-            });
-
-            nextPageBtn.addEventListener('click', function() {
-                if (currentPage < totalPages - 1) {
-                    currentPage++;
-                    fetchLogs();
-                }
-            });
-
-            function fetchLogs() {
-                loading.style.display = 'block';
-                logsTable.style.display = 'none';
-                noLogs.style.display = 'none';
-
-                const email = document.getElementById('email').value;
-                const action = document.getElementById('action').value;
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
-
-                let url = `/api/activity-logs?page=${currentPage}&size=10&sort=timestamp,desc`;
-
-                if (email) {
-                    url = `/api/activity-logs/user/${email}?page=${currentPage}&size=10&sort=timestamp,desc`;
-                } else if (action) {
-                    url = `/api/activity-logs/action/${action}?page=${currentPage}&size=10&sort=timestamp,desc`;
-                } else if (startDate && endDate) {
-                    const formattedStartDate = toBangkokISOString(startDate);
-                    const formattedEndDate = toBangkokISOString(endDate);
-                    url = `/api/activity-logs/date-range?start=${formattedStartDate}&end=${formattedEndDate}&page=${currentPage}&size=10&sort=timestamp,desc`;
-                }
-
-                fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch logs');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        totalPages = data.totalPages;
-                        pageInfo.textContent = `Showing page ${currentPage + 1} of ${totalPages || 1}`;
-                        prevPageBtn.disabled = currentPage === 0;
-                        nextPageBtn.disabled = currentPage >= totalPages - 1;
-                        logsTableBody.innerHTML = '';
-
-                        if (data.content && data.content.length > 0) {
-                            data.content.forEach(log => {
-                                const row = document.createElement('tr');
-                                const timestamp = new Date(log.timestamp);
-                                const formattedDate = timestamp.toLocaleDateString() + ' ' + timestamp.toLocaleTimeString();
-
-                                row.innerHTML = `
-                                    <td>${formattedDate}</td>
-                                    <td>${escapeHtml(log.email)}</td>
-                                    <td>${escapeHtml(log.action)}</td>
-                                    <td>${escapeHtml(log.ipAddress || '-')}</td>
-                                    <td class="details-cell" title="${escapeHtml(log.details)}">${escapeHtml(log.details)}</td>
-                                `;
-                                logsTableBody.appendChild(row);
-                            });
-
-                            logsTable.style.display = 'table';
-                            noLogs.style.display = 'none';
-                        } else {
-                            logsTable.style.display = 'none';
-                            noLogs.style.display = 'block';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching logs:', error);
-                        noLogs.textContent = 'Error loading logs: ' + error.message;
-                        noLogs.style.display = 'block';
-                        logsTable.style.display = 'none';
-                    })
-                    .finally(() => {
-                        loading.style.display = 'none';
-                    });
-            }
-
-            function escapeHtml(unsafe) {
-                if (!unsafe) return '';
-                return unsafe
-                    .toString()
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
             }
         });
-    </script>
+
+        nextPageBtn.addEventListener('click', function() {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                fetchLogs();
+            }
+        });
+
+        function fetchLogs() {
+            loading.style.display = 'block';
+            logsTable.style.display = 'none';
+            noLogs.style.display = 'none';
+
+            const email = document.getElementById('email').value;
+            const action = document.getElementById('action').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            let url = `/api/activity-logs?page=${currentPage}&size=10&sort=timestamp,desc`;
+
+            if (email) {
+                url = `/api/activity-logs/user/${email}?page=${currentPage}&size=10&sort=timestamp,desc`;
+            } else if (action) {
+                url = `/api/activity-logs/action/${action}?page=${currentPage}&size=10&sort=timestamp,desc`;
+            } else if (startDate && endDate) {
+                const formattedStartDate = toBangkokISOString(startDate);
+                const formattedEndDate = toBangkokISOString(endDate);
+                url = `/api/activity-logs/date-range?start=${encodeURIComponent(formattedStartDate)}&end=${encodeURIComponent(formattedEndDate)}&page=${currentPage}&size=10&sort=timestamp,desc`;
+            }
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch logs');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    totalPages = data.totalPages;
+                    pageInfo.textContent = `Showing page ${currentPage + 1} of ${totalPages || 1}`;
+                    prevPageBtn.disabled = currentPage === 0;
+                    nextPageBtn.disabled = currentPage >= totalPages - 1;
+                    logsTableBody.innerHTML = '';
+
+                    if (data.content && data.content.length > 0) {
+                        data.content.forEach(log => {
+                            const row = document.createElement('tr');
+                            const formattedDate = formatBangkokTime(log.timestamp);
+
+                            row.innerHTML = `
+                                <td>${formattedDate}</td>
+                                <td>${escapeHtml(log.email)}</td>
+                                <td>${escapeHtml(log.action)}</td>
+                                <td>${escapeHtml(log.ipAddress || '-')}</td>
+                                <td class="details-cell" title="${escapeHtml(log.details)}">${escapeHtml(truncateDetails(log.details))}</td>
+                            `;
+                            logsTableBody.appendChild(row);
+                        });
+
+                        logsTable.style.display = 'table';
+                        noLogs.style.display = 'none';
+                    } else {
+                        logsTable.style.display = 'none';
+                        noLogs.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                    noLogs.textContent = 'Error loading logs: ' + error.message;
+                    noLogs.style.display = 'block';
+                    logsTable.style.display = 'none';
+                })
+                .finally(() => {
+                    loading.style.display = 'none';
+                });
+        }
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function truncateDetails(details, maxLength = 50) {
+            if (!details) return '';
+            details = details.toString();
+            return details.length > maxLength 
+                ? details.substring(0, maxLength) + '...' 
+                : details;
+        }
+    });
+</script>
 
 </body>
 </html>
