@@ -38,9 +38,8 @@ public class Order {
 
     private String deliveryType; // Delivery type (pickup/shipping)
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime orderDate;
-
+@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Bangkok")
+private LocalDateTime orderDate;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user; // User object instead of username
