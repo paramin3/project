@@ -22,8 +22,8 @@ public class UserActivityLog {
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 
-    @Column(name = "details")
-    private String details;
+ @Column(name = "details", columnDefinition = "TEXT")
+private String details;
 
     // Constructors
     public UserActivityLog() {}
