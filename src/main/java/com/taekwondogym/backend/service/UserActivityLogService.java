@@ -28,10 +28,9 @@ public class UserActivityLogService {
         String email = auth != null && auth.isAuthenticated() ? auth.getName() : "anonymous";
         String ipAddress = extractIpAddress(request);
         
-UserActivityLog log = new UserActivityLog(email, action, ipAddress, details);
-        log.setTimestamp(ZonedDateTime.now(BANGKOK_ZONE));
+        UserActivityLog log = new UserActivityLog(email, action, ipAddress, details);
         activityLogRepository.save(log);
-    }
+            }
     
     public Page<UserActivityLog> getUserActivityLogs(String email, Pageable pageable) {
         return activityLogRepository.findByEmail(email, pageable);
