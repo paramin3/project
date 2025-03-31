@@ -2,10 +2,9 @@ package com.taekwondogym.backend.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
