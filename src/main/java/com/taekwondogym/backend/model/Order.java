@@ -210,11 +210,11 @@ private ZonedDateTime orderDate;
         this.orderItems = orderItems;
     }
 
-    public LocalDateTime getOrderDate() {
+    public ZonedDateTime getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(LocalDateTime orderDate) {
+    public void setOrderDate(ZonedDateTime orderDate) {
         this.orderDate = orderDate;
     }
 }
