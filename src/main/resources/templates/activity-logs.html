@@ -243,7 +243,10 @@
                 const action = document.getElementById('action').value;
                 const startDate = document.getElementById('startDate').value;
                 const endDate = document.getElementById('endDate').value;
-                
+                const formattedStartDate = toBangkokISOString(startDate);
+		const formattedEndDate = toBangkokISOString(endDate);
+		    
+
                 // Build URL based on filters
                 let url = `/api/activity-logs?page=${currentPage}&size=10&sort=timestamp,desc`;
                 
@@ -317,7 +320,15 @@
                         loading.style.display = 'none';
                     });
             }
-            
+            function toBangkokISOString(dateStr) {
+    const date = new Date(dateStr);
+    const offset = -date.getTimezoneOffset(); // in minutes
+    const pad = n => n.toString().padStart(2, '0');
+    const sign = offset >= 0 ? '+' : '-';
+    const hours = pad(Math.floor(Math.abs(offset) / 60));
+    const minutes = pad(Math.abs(offset) % 60);
+    return date.toISOString().split('.')[0] + sign + hours + ':' + minutes;
+}
             // Helper function to escape HTML
             function escapeHtml(unsafe) {
                 if (!unsafe) return '';
