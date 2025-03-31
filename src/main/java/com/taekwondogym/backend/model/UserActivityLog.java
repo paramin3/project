@@ -19,8 +19,9 @@ public class UserActivityLog {
     @Column(name = "ip_address")
     private String ipAddress;
 
-    @Column(name = "timestamp", nullable = false)
-    private ZonedDateTime timestamp;
+@Column(name = "timestamp", nullable = false)
+@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Bangkok")
+private ZonedDateTime timestamp;
 
 @Column(name = "details", length = 1000)
 private String details;
